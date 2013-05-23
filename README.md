@@ -12,7 +12,7 @@ var suspend = require('suspend'),
 
 // simply wrap a generator in `suspend()`
 suspend(function* (resume) {
-    // and yield for suspended execution, passing `resume` instead of a callback
+    // ...and yield for suspended execution, passing `resume` instead of a callback
     var data = yield fs.readFile(__filename, resume);
     // the result is the array of arguments passed to `resume`
     console.log(data[0].toString('utf8'));
@@ -21,17 +21,17 @@ suspend(function* (resume) {
 
 ## Why Generators (and Why `suspend`)?
 
-[ES6 Generators](http://wiki.ecmascript.org/doku.php?id=harmony:generators) landed in V8 3.19, which means they're [available in Node.js since v0.11.2](http://blog.nodejs.org/2013/05/13/node-v0-11-2-unstable/).  Generators are awesome because, among other things, they allow for "suspended execution" semantics using the `yield` keyword ([read more on the ecmascript wiki](http://wiki.ecmascript.org/doku.php?id=harmony:generators)).
+[ES6 Generators](http://wiki.ecmascript.org/doku.php?id=harmony:generators) landed in V8 3.19, which means they're [available in Node.js since v0.11.2](http://blog.nodejs.org/2013/05/13/node-v0-11-2-unstable/).  Generators are awesome because, among other things, they allow for "suspended execution" semantics using the `yield` keyword.
 
 To illustrate, consider the following example:
 
 ```javascript
-// note: this example is using vanilla generators - suspend makes this a lot prettier
+// note: this example is using vanilla generators; suspend makes this a lot prettier
 
 function* myGenerator() {
     console.log('hello');
     yield sleep(2000);
-    // prints 2 seconds later
+    // 2 seconds later
     console.log('world');
 }
 
@@ -46,7 +46,7 @@ function sleep(ms) {
 }
 ```
 
-While the syntax leaves something to be desired, the 2 second pause between `console.log('hello')` and `console.log('world')` is supremely interesting.  Prior to generators, JavaScript had absolutely no language constructs to facilitate suspended execution, which is why all asynchronous operations in Node.js use callbacks.
+While the syntax above leaves something to be desired, the 2 second pause between `console.log('hello')` and `console.log('world')` is incredibly significant.  Prior to generators, JavaScript had absolutely no language constructs to facilitate suspended execution, which is why all asynchronous operations in Node.js use callbacks.
 
 What `suspend` does, then, is provide a small abstraction around generators that is designed to "play nice" with Node.js' existing callback conventions.  Here's the previous example modified to use `suspend`:
 
@@ -54,7 +54,7 @@ What `suspend` does, then, is provide a small abstraction around generators that
 suspend(function* (resume) {
     console.log('hello');
     yield sleep(2000, resume);
-    // prints 2 seconds later
+    // 2 seconds later
     console.log('world');
 })();
 
@@ -69,12 +69,11 @@ Notice that not only is the `suspend` version much cleaner, but the `sleep()` fu
 suspend(function* (resume) {
     console.log('hello');
     yield setTimeout(resume, 2000);
-    // prints 2 seconds later
     console.log('world');
 })();
 ```
 
-Here's another way to think about it: `suspend` is "red light, green light" for your code execution.  `yield` means stop, and `resume` means go.
+Here's another way to think about it: `suspend` is "red light, green light" for asynchronous code execution.  `yield` means stop, and `resume` means go.
 
 ## How `suspend` Works
 
@@ -92,7 +91,7 @@ The generator itself is then initialized by invoking the returned function:
 run();
 ```
 
-Assigning this initializer function to a temporary variable is, of course, necessary.  Instead, we can just invoke it immediately:
+Assigning this initializer to a temporary variable is, of course, unnecessary.  Instead, we can simply invoke it immediately:
 
 ```javascript
 suspend(function* () {
@@ -100,7 +99,7 @@ suspend(function* () {
 })();
 ```
 
-Invoking the generator like this is intentionally made optional, as sometimes, just like with regular functions, you don't want it to run immediately.  For example, you may want to wait for an event before beginning execution:
+Invoking the generator like this is intentionally made optional.  Sometimes, just like with regular functions, you don't want it to run immediately.  For example, you may want to wait for an event before beginning execution:
 
 ```javascript
 someEmitter.on('some-event', suspend(function* () {
@@ -116,7 +115,7 @@ suspend(function* (resume) {
 })();
 ```
 
-As can be seen, when the generator is initialized, it is passed a reference to `resume`, which is nothing more than a reusable callback, bound to the resulting iterator, and just barely smart enough to understand Node.js' callback conventions.  All arguments passed to `resume` are available in an array, which is the result of the yield assignment:
+As can be seen, when the generator is initialized, it is passed a reference to `resume`.  `resume` is nothing more than a reusable callback, bound to the resulting iterator, that is just barely smart enough to understand Node.js' callback conventions.  All arguments passed to `resume` become available in an array, which is the result of the yield assignment:
 
 ```javascript
 suspend(function* (resume) {
@@ -126,7 +125,7 @@ suspend(function* (resume) {
 })();
 ```
 
-Any arguments passed to the initializer are available following the `resume` parameter:
+Any arguments passed to the initializer are passed to the generator as well, following the `resume` parameter:
 
 ```javascript
 suspend(function* (resume, fileName) {
