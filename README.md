@@ -15,7 +15,7 @@ suspend(function* (resume) {
     // ...and yield for suspended execution, passing `resume` instead of a callback
     var data = yield fs.readFile(__filename, resume);
     // the result is the array of arguments passed to `resume`
-    console.log(data[0].toString('utf8'));
+    console.log(data[1].toString('utf8'));
 })();
 ```
 
@@ -121,7 +121,7 @@ As can be seen, when the generator is initialized, it is passed a reference to `
 suspend(function* (resume) {
     var data = yield fs.readFile(__filename, resume);
     // the Buffer returned from readFile is available in the first index
-    console.log(data[0].toString('utf8'));
+    console.log(data[1].toString('utf8'));
 })();
 ```
 
@@ -130,7 +130,7 @@ Any arguments passed to the initializer are passed to the generator as well, fol
 ```javascript
 suspend(function* (resume, fileName) {
     var data = yield fs.readFile(fileName, resume);
-    console.log(data[0].toString('utf8'));
+    console.log(data[1].toString('utf8'));
 })(__filename);
 ```
 
