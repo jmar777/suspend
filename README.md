@@ -1,8 +1,8 @@
 # suspend
 
-`suspend` is a small, experimental library for Node.js that uses ES6 language features to simplify asynchronous code interactions.
+**suspend** is a small, experimental library for Node.js that uses ES6 language features to simplify asynchronous code interactions.
 
-Specifically, `suspend` exposes a minimal API around ES6 generators that is expressly designed to work seamlessly with Node.js' existing callback conventions.  This allows unobtrusive use of  `yield` execution semantics that works seamlessly with existing Node.js code bases.  `suspend` uses 100% native JavaScript - no transpiling or library-wrapping required.
+Specifically, **suspend** exposes a minimal API around ES6 generators that is expressly designed to work seamlessly with Node.js' existing callback conventions.  This allows unobtrusive use of  `yield` execution semantics that works seamlessly with existing Node.js code bases.  **suspend** uses 100% native JavaScript - no transpiling or library-wrapping required.
 
 ## Quick Example
 
@@ -48,7 +48,7 @@ function sleep(ms) {
 
 While the syntax above leaves something to be desired, the 2 second pause between `console.log('hello')` and `console.log('world')` is incredibly significant.  Prior to generators, JavaScript had absolutely no language constructs to facilitate suspended execution, which is why all asynchronous operations in Node.js use callbacks.
 
-What `suspend` does, then, is provide a small abstraction around generators that is designed to "play nice" with Node.js' existing callback conventions.  Here's the previous example modified to use `suspend`:
+What **suspend** does, then, is provide a small abstraction around generators that is designed to "play nice" with Node.js' existing callback conventions.  Here's the previous example modified to use **suspend**:
 
 ```javascript
 suspend(function* (resume) {
@@ -63,7 +63,7 @@ function sleep(ms, cb) {
 }
 ```
 
-Notice that not only is the `suspend` version much cleaner, but the `sleep()` function no longer has to know about the iterator at all.  In fact, we can remove `sleep()` altogether at this point if we want:
+Notice that not only is the **suspend** version much cleaner, but the `sleep()` function no longer has to know about the iterator at all.  In fact, we can remove `sleep()` altogether at this point if we want:
 
 ```javascript
 suspend(function* (resume) {
@@ -73,7 +73,7 @@ suspend(function* (resume) {
 })();
 ```
 
-Here's another way to think about it: `suspend` is "red light, green light" for asynchronous code execution.  `yield` means stop, and `resume` means go.
+Here's another way to think about it: **suspend** is "red light, green light" for asynchronous code execution.  `yield` means stop, and `resume` means go.
 
 ## Usage
 
@@ -140,7 +140,7 @@ suspend(function* (resume, fileName) {
 
 #### Default Behavior
 
-By default, `suspend` won't do anything fancy with errors.  By convention, if an asynchronous method returns an error, it will be the first argument passed to the `resume` callback.  `suspend` won't make any assumptions about this, and will simply return the error in the first index of the results array.
+By default, **suspend** won't do anything fancy with errors.  If Node.js conventions are followed, if an asynchronous method returns an error, it will be the first argument passed to the `resume` callback.  **suspend** won't make any assumptions about this, and will simply return the error in the first index of the results array.
 
 Using this default behavior, then, error handling is much the same as before:
 
@@ -161,7 +161,7 @@ if (res[0]) {
 console.log(res[1].toString('utf8'));
 ```
 
-**Note: if the results array is driving you crazy, be sure to read to the end of the README.**
+*Note: if the results array is driving you crazy, be sure to read to the end of the README.*
 
 #### Throw Behavior
 
@@ -178,19 +178,20 @@ suspend(function* () {
 }, { throw: true })();
 ```
 
-When `throw` is set to `true`, anytime an error is passed to the `resume` callback (well, any non-null first parameter) it will be thrown instead of returned in the results array.  Also, since the error is no longer being returned in the results array, the non-error arguments begin at index 0 (instead of 1).
+When `throw` is set to `true`, if an error is passed to the `resume` callback (well, any non-null first parameter) it will be thrown instead of returned in the results array.  Also, since the error is no longer being returned in the results array, the non-error arguments begin at index 0 (instead of 1).
 
-## Hate the results array? Me too, but bear with me...
+## Hate the results array?
 
-Having to access results through an array is a bit of an eyesore.  There is a method to this madness, though.  To the point, this aspect of the API is eagerly waiting for [destructuring assignment](http://wiki.ecmascript.org/doku.php?id=harmony:destructuring) to be implemented in V8 (currently it has progressed to Draft ES6 Specification, just like generators).
+*Me too, but bear with me...*
 
-Once destructuring assignment is available, using `suspend` becomes even cleaner:
+Having to access results through an array is a bit of an eyesore.  There is a method to this madness, though.  This aspect of the API is eagerly waiting for [destructuring assignment](http://wiki.ecmascript.org/doku.php?id=harmony:destructuring) to be implemented in V8 (currently it has progressed to Draft ES6 Specification, just like generators).
+
+Once destructuring assignment is available, using **suspend** becomes even cleaner:
 
 ```javascript
 // without destructuring assignment
 var res = yield fs.readFile(__filename, resume);
 // res[0] === error, res[1] === buffer
-```
 
 // with destructuring assignment
 var [err, buffer] = yield fs.readFile(__filename, resume);
@@ -201,9 +202,9 @@ So, as with all things, patience, and [a whole lot of nagging](https://code.goog
 
 ## Is `suspend` Ready To Be Used?
 
-Mmmm... probably not.  Currently generators are only supported in unstable (v0.11.x) versions of Node.js, and `suspend` itself is very new.  I'll be eating my own dog food with it in side projects, and I would much appreciate feedback from any early adopters.  If you find anything or have any suggestions, please open an issue (or email me at jmar777@gmail.com)!
+Mmmm... probably not.  Currently generators are only supported in unstable (v0.11.x) versions of Node.js, and **suspend** itself is very new.  I'll be eating my own dog food with it in side projects, and I would much appreciate feedback from any early adopters.  If you find anything or have any suggestions, please open an issue (or email me at jmar777@gmail.com)!
 
-On a related note, `suspend` will adhere to [SemVer](http://semver.org/)-compliant version updates, so if you do happen to use it you won't have to worry about the rug being pulled out from under you.
+On a related note, **suspend** will adhere to [SemVer](http://semver.org/)-compliant version updates, so if you do happen to use it you won't have to worry about the rug being pulled out from under you.
 
 ## License 
 
