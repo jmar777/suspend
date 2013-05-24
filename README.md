@@ -19,6 +19,12 @@ suspend(function* (resume) {
 })();
 ```
 
+## Installation
+
+```
+$ npm install suspend
+```
+
 ## Why Generators (and Why `suspend`)?
 
 [ES6 Generators](http://wiki.ecmascript.org/doku.php?id=harmony:generators) landed in V8 3.19, which means they're [available in Node.js since v0.11.2](http://blog.nodejs.org/2013/05/13/node-v0-11-2-unstable/).  Generators are awesome because, among other things, they allow for "suspended execution" semantics using the `yield` keyword.
@@ -150,7 +156,7 @@ async.map(['file1','file2','file3'], fs.stat, function(err, results){
 var res = yield async.map(['file1','file2','file3'], fs.stat, resume);
 ```
 
-This begins to illustrate why **suspend** is designed to interoperate with Node.js' existing callback semantics - the goal isn't to replace your existing solutions.  The goal is to simply and unobtrusively make them even better.
+This begins to illustrate why **suspend** is designed to interoperate with Node.js' existing callback semantics.  The goal isn't to replace your existing solutions - the goal is to simply and unobtrusively make them even better.
 
 ### Error Handling
 
