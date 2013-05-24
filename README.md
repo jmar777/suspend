@@ -146,7 +146,7 @@ async.map(['file1','file2','file3'], fs.stat, function(err, results){
     // results is now an array of stats for each file
 });
 
-//async with suspend
+// async with suspend
 var res = yield async.map(['file1','file2','file3'], fs.stat, resume);
 ```
 
