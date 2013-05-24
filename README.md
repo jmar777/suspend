@@ -75,7 +75,9 @@ suspend(function* (resume) {
 
 Here's another way to think about it: `suspend` is "red light, green light" for asynchronous code execution.  `yield` means stop, and `resume` means go.
 
-## How `suspend` Works
+## Usage
+
+### Basic Overview
 
 When you provide a generator reference to `suspend()`, it returns a new function reference that acts as an "initializer":
 
@@ -120,7 +122,7 @@ As can be seen, when the generator is initialized, it is passed a reference to `
 ```javascript
 suspend(function* (resume) {
     var data = yield fs.readFile(__filename, resume);
-    // the Buffer returned from readFile is available in the first index
+    // the Buffer returned from readFile is available at index 1
     console.log(data[1].toString('utf8'));
 })();
 ```
@@ -133,6 +135,75 @@ suspend(function* (resume, fileName) {
     console.log(data[1].toString('utf8'));
 })(__filename);
 ```
+
+### Error Handling
+
+#### Default Behavior
+
+By default, `suspend` won't do anything fancy with errors.  By convention, if an asynchronous method returns an error, it will be the first argument passed to the `resume` callback.  `suspend` won't make any assumptions about this, and will simply return the error in the first index of the results array.
+
+Using this default behavior, then, error handling is much the same as before:
+
+```javascript
+// without suspend
+fs.readFile(__filename, function(err, buffer) {
+    if (err) {
+        // handle error
+    }
+    console.log(buffer.toString('utf8'));
+});
+
+// with suspend
+var res = yield fs.readFile(__filename, resume);
+if (res[0]) {
+    // handle error
+}
+console.log(res[1].toString('utf8'));
+```
+
+**Note: if the results array is driving you crazy, be sure to read to the end of the README.**
+
+#### Throw Behavior
+
+If for whatever reason you prefer to work with thrown exceptions instead, simply set the `throw` option to `true`:
+
+```javascript
+suspend(function* () {
+    try {
+        var res = yield fs.readFile(__filename, resume);
+        console.log(res[0].toString('utf8'));
+    } catch (err) {
+        // handle error
+    }
+}, { throw: true })();
+```
+
+When `throw` is set to `true`, anytime an error is passed to the `resume` callback (well, any non-null first parameter) it will be thrown instead of returned in the results array.  Also, since the error is no longer being returned in the results array, the non-error arguments begin at index 0 (instead of 1).
+
+## Hate the results array? Me too, but bear with me...
+
+Having to access results through an array is a bit of an eyesore.  There is a method to this madness, though.  To the point, this aspect of the API is eagerly waiting for [destructuring assignment](http://wiki.ecmascript.org/doku.php?id=harmony:destructuring) to be implemented in V8 (currently it has progressed to Draft ES6 Specification, just like generators).
+
+Once destructuring assignment is available, using `suspend` becomes even cleaner:
+
+```javascript
+// without destructuring assignment
+var res = yield fs.readFile(__filename, resume);
+// res[0] === error, res[1] === buffer
+```
+
+// with destructuring assignment
+var [err, buffer] = yield fs.readFile(__filename, resume);
+// oh, that's nice...
+```
+
+So, as with all things, patience, and [a whole lot of nagging](https://code.google.com/p/v8/issues/detail?id=811). :)
+
+## Is `suspend` Ready To Be Used?
+
+Mmmm... probably not.  Currently generators are only supported in unstable (v0.11.x) versions of Node.js, and `suspend` itself is very new.  I'll be eating my own dog food with it in side projects, and I would much appreciate feedback from any early adopters.  If you find anything or have any suggestions, please open an issue (or email me at jmar777@gmail.com)!
+
+On a related note, `suspend` will adhere to [SemVer](http://semver.org/)-compliant version updates, so if you do happen to use it you won't have to worry about the rug being pulled out from under you.
 
 ## License 
 
