@@ -136,11 +136,27 @@ suspend(function* (resume, fileName) {
 })(__filename);
 ```
 
+### What about Parallel Execution, Mapping, Etc.?
+
+More advanced flow constructs, in my opinion, already have pretty elegant solutions through libraries like [async](https://github.com/caolan/async/).  While I haven't ruled out support for these types of features in **suspend** itself, for now it is designed to be much more minimal, allowing you to layer on top of your existing control-flow libraries of choice.  For example, here's a modified snippet from the **async** README:
+
+```
+// async without suspend
+async.map(['file1','file2','file3'], fs.stat, function(err, results){
+    // results is now an array of stats for each file
+});
+
+//async with suspend
+var res = yield async.map(['file1','file2','file3'], fs.stat, resume);
+```
+
+This begins to illustrate why **suspend** is designed to interoperate with Node.js' existing callback semantics - the goal isn't to replace your existing solutions.  The goal is to simply and unobtrusively make them even better.
+
 ### Error Handling
 
 #### Default Behavior
 
-By default, **suspend** won't do anything fancy with errors.  If Node.js conventions are followed, if an asynchronous method returns an error, it will be the first argument passed to the `resume` callback.  **suspend** won't make any assumptions about this, and will simply return the error in the first index of the results array.
+By default, **suspend** won't do anything fancy with errors.  If Node.js conventions are followed, errors returned from asynchronous methods will be passed as the first argument to the `resume` callback.  **suspend** won't make any assumptions about this, and will simply return the error in the first index of the results array.
 
 Using this default behavior, then, error handling is much the same as before:
 
