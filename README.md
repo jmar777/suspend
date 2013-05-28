@@ -83,6 +83,16 @@ Here's another way to think about it: **suspend** is "red light, green light" fo
 
 ## Usage
 
+### Harmony Mode
+
+ES6 Generators are still hidden behind the `--harmony` (or `--harmony-generators`) flag in V8, so be sure to enable harmony features:
+
+```
+$ node --harmony-generators your-script.js
+```
+
+Without setting `--harmony` or `--harmony-generators` you will get a syntax error.
+
 ### Basic Overview
 
 When you provide a generator reference to `suspend()`, it returns a new function reference that acts as an "initializer":
