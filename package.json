@@ -1,7 +1,7 @@
 {
 	"author": "Jeremy Martin <jmar777@gmail.com> (http://twitter.com/jmar777)",
 	"name": "suspend",
-	"description": "Generator-based control flow library designed to work seamlessly with Node's callback convention.",
+	"description": "Generator-based control flow library designed to work seamlessly with Node's callback conventions.",
 	"version": "0.1.0",
 	"repository": {
 		"type" : "git",
