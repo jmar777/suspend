@@ -19,9 +19,12 @@ describe('suspend', function() {
 			assert(Array.isArray(res));
 		})
 
-		it('should provide the correct results in the array', function() {
-			assert.ifError(res[0]);
-			assert.strictEqual(res[1], 84);
+		it('should return non-error results starting at index 0', function(done) {
+			suspend(function*(resume) {
+				var doubled = yield asyncDouble(42, resume);
+				assert.strictEqual(doubled[0], 84);
+				done();
+			}, { throw: true })();
 		});
 
 		it('should allow arguments to be passed on initialization', function(done) {
@@ -43,17 +46,17 @@ describe('suspend', function() {
 
 			suspend(function* (resume, num) {
 				var doubled = yield asyncDouble(num, resume);
-				var tripled = yield asyncTriple(doubled[1], resume);
-				var squared = yield asyncSquare(tripled[1], resume);
-				assert.strictEqual(squared[1], 324);
+				var tripled = yield asyncTriple(doubled[0], resume);
+				var squared = yield asyncSquare(tripled[0], resume);
+				assert.strictEqual(squared[0], 324);
 				++doneCount === 2 && done();
 			})(3);
 
 			suspend(function* (resume, num) {
 				var squared = yield asyncSquare(num, resume);
-				var tripled = yield asyncTriple(squared[1], resume);
-				var doubled = yield asyncDouble(tripled[1], resume);	
-				assert.strictEqual(doubled[1], 54);
+				var tripled = yield asyncTriple(squared[0], resume);
+				var doubled = yield asyncDouble(tripled[0], resume);	
+				assert.strictEqual(doubled[0], 54);
 				++doneCount === 2 && done();
 			})(3);
 		});
@@ -65,33 +68,12 @@ describe('suspend', function() {
 				var doubled = yield asyncDouble(num, resume);
 
 				suspend(function* (resume) {
-					var tripled = yield asyncTriple(doubled[1], resume);
-					assert.strictEqual(tripled[1], 18);
+					var tripled = yield asyncTriple(doubled[0], resume);
+					assert.strictEqual(tripled[0], 18);
 					done();
 				})();
 			})(3);
 		});
-
-		it('should return errors returned from async functions', function(done) {
-			suspend(function* (resume) {
-				var res = yield asyncError(resume);
-				assert.strictEqual(res[0].message, 'fail');
-				done();
-			})();
-		});
-
-	});
-
-	describe('with { throw: true }', function() {
-
-		it('should return non-error results starting at index 0', function(done) {
-			suspend(function*(resume) {
-				var doubled = yield asyncDouble(42, resume);
-				assert.strictEqual(doubled[0], 84);
-				done();
-			}, { throw: true })();
-		});
-
 
 		it('should throw errors returned from async functions', function(done) {
 			suspend(function* (resume) {
@@ -104,6 +86,16 @@ describe('suspend', function() {
 			}, { throw: true })();
 		});
 
+	});
+
+	describe('with { throw: true }', function(done) {
+		it('should return errors as first item in array', function(done) {
+			suspend(function* (resume) {
+				var res = yield asyncError(resume);
+				assert.strictEqual(res[0].message, 'fail');
+				done();
+			}, { throw: false })();
+		});
 	});
 
 });
