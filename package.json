@@ -2,14 +2,15 @@
 	"author": "Jeremy Martin <jmar777@gmail.com> (http://twitter.com/jmar777)",
 	"name": "suspend",
 	"description": "Generator-based control flow library designed to work seamlessly with Node's callback conventions.",
-	"version": "0.1.0",
+	"version": "0.1.1-pre",
 	"repository": {
 		"type" : "git",
 		"url" : "git://github.com/jmar777/suspend.git"
 	},
 	"main": "lib/suspend.js",
 	"devDependencies": {
-		"mocha": "1.10.x"
+		"mocha": "1.10.x",
+		"q": "0.9.x"
 	},
 	"engines": {
 		"node": ">=0.11.2"
