@@ -14,7 +14,7 @@ describe('suspend\'s promise API', function() {
 		});
 
 		it('should allow arguments to be passed on initialization', function(done) {
-			suspend(function*(resume, foo) {
+			suspend(function*(foo) {
 				assert.strictEqual(foo, 'bar');
 				done();
 			})('bar');
@@ -30,7 +30,7 @@ describe('suspend\'s promise API', function() {
 		it('should work with multiple generators in parallel', function(done) {
 			var doneCount = 0;
 
-			suspend(function* (resume, num) {
+			suspend(function* (num) {
 				var doubled = yield asyncDouble(num);
 				var tripled = yield asyncTriple(doubled);
 				var squared = yield asyncSquare(tripled);
@@ -38,7 +38,7 @@ describe('suspend\'s promise API', function() {
 				++doneCount === 2 && done();
 			})(3);
 
-			suspend(function* (resume, num) {
+			suspend(function* (num) {
 				var squared = yield asyncSquare(num);
 				var tripled = yield asyncTriple(squared);
 				var doubled = yield asyncDouble(tripled);	
@@ -50,7 +50,7 @@ describe('suspend\'s promise API', function() {
 		it('should work when nested', function(done) {
 			var doneCount = 0;
 
-			suspend(function* (resume, num) {
+			suspend(function* (num) {
 				var doubled = yield asyncDouble(num);
 
 				suspend(function* () {

@@ -13,7 +13,7 @@ describe('suspend\'s resume API', function() {
 		});
 
 		it('should allow arguments to be passed on initialization', function(done) {
-			suspend(function*(resume, foo) {
+			suspend(function*(foo, resume) {
 				assert.strictEqual(foo, 'bar');
 				done();
 			})('bar');
@@ -29,7 +29,7 @@ describe('suspend\'s resume API', function() {
 		it('should work with multiple generators in parallel', function(done) {
 			var doneCount = 0;
 
-			suspend(function* (resume, num) {
+			suspend(function* (num, resume) {
 				var doubled = yield asyncDouble(num, resume);
 				var tripled = yield asyncTriple(doubled, resume);
 				var squared = yield asyncSquare(tripled, resume);
@@ -37,7 +37,7 @@ describe('suspend\'s resume API', function() {
 				++doneCount === 2 && done();
 			})(3);
 
-			suspend(function* (resume, num) {
+			suspend(function* (num, resume) {
 				var squared = yield asyncSquare(num, resume);
 				var tripled = yield asyncTriple(squared, resume);
 				var doubled = yield asyncDouble(tripled, resume);	
@@ -49,7 +49,7 @@ describe('suspend\'s resume API', function() {
 		it('should work when nested', function(done) {
 			var doneCount = 0;
 
-			suspend(function* (resume, num) {
+			suspend(function* (num, resume) {
 				var doubled = yield asyncDouble(num, resume);
 
 				suspend(function* (resume) {
