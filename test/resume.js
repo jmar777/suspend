@@ -98,6 +98,18 @@ describe('suspend\'s resume API', function() {
 			})();
 		});
 	});
+
+	describe('with resume.raw()', function() {
+		it('should trigger .raw() behavior for a single yield expression', function(done) {
+			suspend(function*(resume) {
+				var res = yield asyncDouble(42, resume.raw());
+				assert(Array.isArray(res));
+				var doubled = yield asyncDouble(42, resume);
+				assert(typeof doubled === 'number');
+				done();
+			})();
+		});
+	});
 });
 
 // async functions used for test cases
