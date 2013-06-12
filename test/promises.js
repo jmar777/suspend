@@ -5,27 +5,12 @@ var assert = require('assert'),
 describe('suspend\'s promise API', function() {
 
 	describe('with default options', function() {
-
-		var res;
-
 		it('should resolve node-style callbacks', function(done) {
 			suspend(function*() {
-				res = yield asyncDouble(42);
-				assert(res);
+				var doubled = yield asyncDouble(42);
+				assert.strictEqual(doubled, 84);
 				done();
 			})();
-		});
-
-		it('should provide results as an array', function() {
-			assert(Array.isArray(res));
-		})
-
-		it('should return non-error results starting at index 0', function(done) {
-			suspend(function*() {
-				var doubled = yield asyncDouble(42);
-				assert.strictEqual(doubled[0], 84);
-				done();
-			}, { throw: true })();
 		});
 
 		it('should allow arguments to be passed on initialization', function(done) {
@@ -47,17 +32,17 @@ describe('suspend\'s promise API', function() {
 
 			suspend(function* (resume, num) {
 				var doubled = yield asyncDouble(num);
-				var tripled = yield asyncTriple(doubled[0]);
-				var squared = yield asyncSquare(tripled[0]);
-				assert.strictEqual(squared[0], 324);
+				var tripled = yield asyncTriple(doubled);
+				var squared = yield asyncSquare(tripled);
+				assert.strictEqual(squared, 324);
 				++doneCount === 2 && done();
 			})(3);
 
 			suspend(function* (resume, num) {
 				var squared = yield asyncSquare(num);
-				var tripled = yield asyncTriple(squared[0]);
-				var doubled = yield asyncDouble(tripled[0]);	
-				assert.strictEqual(doubled[0], 54);
+				var tripled = yield asyncTriple(squared);
+				var doubled = yield asyncDouble(tripled);	
+				assert.strictEqual(doubled, 54);
 				++doneCount === 2 && done();
 			})(3);
 		});
@@ -69,8 +54,8 @@ describe('suspend\'s promise API', function() {
 				var doubled = yield asyncDouble(num);
 
 				suspend(function* () {
-					var tripled = yield asyncTriple(doubled[0]);
-					assert.strictEqual(tripled[0], 18);
+					var tripled = yield asyncTriple(doubled);
+					assert.strictEqual(tripled, 18);
 					done();
 				})();
 			})(3);
@@ -89,16 +74,31 @@ describe('suspend\'s promise API', function() {
 
 	});
 
-	describe('with { throw: false }', function() {
+	describe('with .raw()', function() {
+		it('should provide results as an array', function(done) {
+			suspend.raw()(function*() {
+				var res = yield asyncDouble(42);
+				assert(Array.isArray(res));
+				done();
+			})();
+		});
+
 		it('should return errors as first item in array', function(done) {
-			suspend.throw(false)(function* () {
+			suspend.raw()(function* () {
 				var res = yield asyncError();
 				assert.strictEqual(res[0].message, 'fail');
 				done();
 			})();
 		});
-	});
 
+		it('should return non-error results starting at index 1', function(done) {
+			suspend.raw()(function* () {
+				var res = yield asyncDouble(42);
+				assert.strictEqual(res[1], 84);
+				done();
+			})();
+		});
+	});
 });
 
 // async functions used for test cases
