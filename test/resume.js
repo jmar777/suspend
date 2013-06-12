@@ -1,7 +1,7 @@
 var assert = require('assert'),
 	suspend = require('../');
 
-describe('suspend', function() {
+describe('suspend\'s resume API', function() {
 
 	describe('with default options', function() {
 
@@ -88,13 +88,13 @@ describe('suspend', function() {
 
 	});
 
-	describe('with { throw: true }', function(done) {
+	describe('with { throw: false }', function(done) {
 		it('should return errors as first item in array', function(done) {
-			suspend(function* (resume) {
+			suspend.throw(false)(function* (resume) {
 				var res = yield asyncError(resume);
 				assert.strictEqual(res[0].message, 'fail');
 				done();
-			}, { throw: false })();
+			})();
 		});
 	});
 

@@ -2,7 +2,7 @@ var assert = require('assert'),
 	suspend = require('../'),
 	Q = require('q');
 
-describe('suspend', function() {
+describe('suspend\'s promise API', function() {
 
 	describe('with default options', function() {
 
@@ -89,13 +89,13 @@ describe('suspend', function() {
 
 	});
 
-	describe('with { throw: true }', function(done) {
+	describe('with { throw: false }', function() {
 		it('should return errors as first item in array', function(done) {
-			suspend(function* () {
+			suspend.throw(false)(function* () {
 				var res = yield asyncError();
 				assert.strictEqual(res[0].message, 'fail');
 				done();
-			}, { throw: false })();
+			})();
 		});
 	});
 
