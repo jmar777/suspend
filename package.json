@@ -1,7 +1,8 @@
 {
 	"author": "Jeremy Martin <jmar777@gmail.com> (http://twitter.com/jmar777)",
 	"name": "suspend",
-	"description": "Generator-based control flow library designed to work seamlessly with Node's callback conventions.",
+	"description": "Callback-free control flow for node using ES6 generators.",
+	"keywords": ["async", "generator", "yield", "callback", "promise", "flow", "control", "suspend"],
 	"version": "0.1.1-pre",
 	"repository": {
 		"type" : "git",
@@ -17,5 +18,6 @@
 	},
 	"engines": {
 		"node": ">=0.11.2"
-	}
+	},
+	"license": "MIT"
 }
