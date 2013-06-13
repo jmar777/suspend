@@ -1,21 +1,28 @@
 # suspend
 
-**suspend** is a small, experimental library for Node that uses ES6 language features to simplify asynchronous code interactions.
+**suspend** is a [generator](http://wiki.ecmascript.org/doku.php?id=harmony:generators)-based control-flow utility for Node that enables clean, pseudo-synchronous syntax for asynchronous interactions.  Specifically, suspend is a small abstraction around generators that is designed to "play nice" with Node's [callback conventions](http://docs.nodejitsu.com/articles/getting-started/control-flow/what-are-callbacks) and/or [promises](http://promises-aplus.github.io/promises-spec/).
 
-Specifically, **suspend** exposes a minimal API around ES6 generators that is expressly designed to work transparently with Node's existing callback conventions.  This allows unobtrusive use of `yield` execution semantics that works seamlessly with existing Node code bases.  **suspend** uses 100% native JavaScript - no transpiling or library-wrapping required.
+## Quick Examples
 
-## Quick Example
+*Working with node-style callbacks:*
 
 ```javascript
-var suspend = require('suspend'),
-    fs = require('fs');
+var suspend = require('suspend');
 
-// simply wrap a generator in `suspend()`
 suspend(function* (resume) {
-    // ...and yield for suspended execution, passing `resume` instead of a callback
-    var data = yield fs.readFile(__filename, resume);
-    // the result is the array of arguments passed to `resume`
-    console.log(data[1].toString('utf8'));
+    var data = yield fs.readFile(__filename, 'utf8', resume);
+    console.log(data);
+})();
+```
+
+*Working with promises:*
+
+```javascript
+var suspend = require('suspend');
+
+suspend(function* () {
+    var user = yield db.users.findWithPromise({ username: 'jmar777' });
+    console.log(user.favoriteColor);
 })();
 ```
 
@@ -25,99 +32,40 @@ suspend(function* (resume) {
 $ npm install suspend
 ```
 
-## Why Generators (and Why `suspend`)?
-
-[ES6 Generators](http://wiki.ecmascript.org/doku.php?id=harmony:generators) landed in V8 3.19, which means they're [available in Node since v0.11.2](http://blog.nodejs.org/2013/05/13/node-v0-11-2-unstable/).  Generators are awesome because, among other things, they allow for "suspended execution" semantics using the `yield` keyword.
-
-To illustrate, consider the following example:
-
-```javascript
-// note: this example is using vanilla generators; suspend makes this a lot prettier
-
-function* myGenerator() {
-    console.log('hello');
-    yield sleep(2000);
-    // 2 seconds later
-    console.log('world');
-}
-
-// create and initiate our iterator
-var iterator = myGenerator();
-iterator.next();
-
-function sleep(ms) {
-    setTimeout(function() {
-        iterator.next();
-    }, ms);
-}
-```
-
-While the syntax above leaves something to be desired, the 2 second pause between `console.log('hello')` and `console.log('world')` is incredibly significant.  Prior to generators, JavaScript had absolutely no language constructs to facilitate suspended execution, which is why all asynchronous operations in Node use callbacks.
-
-What **suspend** does, then, is provide a small abstraction around generators that is designed to "play nice" with Node's existing callback conventions.  Here's the previous example modified to use **suspend**:
-
-```javascript
-suspend(function* (resume) {
-    console.log('hello');
-    yield sleep(2000, resume);
-    // 2 seconds later
-    console.log('world');
-})();
-
-function sleep(ms, cb) {
-    setTimeout(cb, ms);
-}
-```
-
-Notice that not only is the **suspend** version much cleaner, but the `sleep()` function no longer has to know about the iterator at all.  In fact, we can remove `sleep()` altogether at this point if we want:
-
-```javascript
-suspend(function* (resume) {
-    console.log('hello');
-    yield setTimeout(resume, 2000);
-    console.log('world');
-})();
-```
-
-Here's another way to think about it: **suspend** is "red light, green light" for asynchronous code execution.  `yield` means stop, and `resume` means go.
-
 ## Usage
 
-### Harmony Mode
-
-ES6 Generators are still hidden behind the `--harmony` (or `--harmony-generators`) flag in V8, so be sure to enable harmony features:
+*Note:* ES6 Generators are still hidden behind the `--harmony-generators` flag in V8:
 
 ```
 $ node --harmony-generators your-script.js
 ```
 
-Without setting `--harmony` or `--harmony-generators` you will get a syntax error.
+Without setting `--harmony-generators` you will get a syntax error.
 
-### Basic Overview
+### API Overview
 
-When you provide a generator reference to `suspend()`, it returns a new function reference that acts as an "initializer":
+#### `suspend(fn*)`
+
+The suspend module exports the `suspend()` function.  You provide `suspend()` with a generator, and it returns a new "initializer" function:
 
 ```javascript
-var run = suspend(function* () {
-    ...
+var init = suspend(function* () {
+    console.log('hello!');
 });
+
+init();
+// 'hello!'
 ```
 
-The generator itself is then initialized by invoking the returned function:
-
-```javascript
-run();
-```
-
-Assigning this initializer to a temporary variable is, of course, unnecessary.  Instead, we can simply invoke it immediately:
+Of course if you want to invoke it immediately, it would be more idiomatic to simply do so without the temporary assignment:
 
 ```javascript
 suspend(function* () {
-    ...
+    console.log('hello!');
 })();
 ```
 
-Invoking the generator like this is intentionally made optional.  Sometimes, just like with regular functions, you don't want it to run immediately.  For example, you may want to wait for an event before beginning execution:
+Initializing the generator is intentionally made optional, as sometimes you don't want it to run immediately.  For example, you may want to wait for an event before beginning execution:
 
 ```javascript
 someEmitter.on('some-event', suspend(function* () {
@@ -125,118 +73,126 @@ someEmitter.on('some-event', suspend(function* () {
 }));
 ```
 
-Now, given that the majority of the Node ecosystem uses callbacks to handle asynchronous operations, we need a way to easily interact with functions that expect a callback.  This is where `resume` comes into play:
+#### resume
+
+Given that the majority of the Node ecosystem uses callbacks to handle asynchronous operations, suspend provides a simple mechanism for interacting with node-style callbacks: `resume`.
 
 ```javascript
 suspend(function* (resume) {
-    var data = yield fs.readFile(__filename, resume);
+    var data = yield fs.readFile(__filename, 'utf8', resume);
 })();
 ```
 
-As can be seen, when the generator is initialized, it is passed a reference to `resume`.  `resume` is nothing more than a reusable callback, bound to the resulting iterator, that is just barely smart enough to understand Node's callback conventions.  All arguments passed to `resume` become available in an array, which is the result of the yield assignment:
+And just like that, we have our data - no callbacks, transpiling, or wrappers required!
+
+The two things you should know about `resume` are:
+
+1. `resume` is nothing more than a reusable callback that is just barely smart enough to understand node-style callbacks.
+2. `resume` is added as the last argument to the generator function, making it optional.
+
+Here's a suspend example that accepts a parameter before the `resume` argument:
+
+```javascript
+var printFile = suspend(function* (fileName, resume) {
+    console.log(yield fs.readFile(filename, 'utf8', resume));
+});
+
+printFile(__filename);
+```
+
+Here's another way to think about it: suspend is "red light, green light" for asynchronous code execution.  `yield` means stop, and `resume` means go.
+
+#### Promises
+
+Using promises or a module that does? No problem (and no need for `resume` either):
+
+```javascript
+suspend(function* () {
+    var user = yield UserModel.find({ username: 'jmar777' }).exec();
+    console.log(user.favoriteColor);
+})();
+```
+
+The above is an example of working with [mongoose](http://mongoosejs.com/), which returns promises for async operations.  If a yield expression evaluates to a ["thenable"](https://github.com/promises-aplus/promises-spec#terminology), then suspend can figure out the rest.
+
+#### Error Handling
+
+By default, suspend will throw errors back within the generator body, so try/catch's will work:
 
 ```javascript
 suspend(function* (resume) {
-    var data = yield fs.readFile(__filename, resume);
-    // the Buffer returned from readFile is available at index 1
-    console.log(data[1].toString('utf8'));
+    try {
+        var data = yield fs.readFile(__filename, 'utf8', resume);
+        console.log(data);
+    } catch (err) {
+        // handle error
+    }
 })();
 ```
 
-Any arguments passed to the initializer are passed to the generator as well, following the `resume` parameter:
+Note: if you prefer returned errors, instead of thrown, be sure to read the documentation below on `.raw()`.
+
+#### suspend.raw()
+
+Suspend's default behavior assumes that...
+
+1. Callbacks will use Node's error-first callback convention
+2. If an error is returned, it should be thrown
+3. If there aren't any errors, then the first non-error result should be returned
+
+While this holds true for the vast majority of Node's use cases, we need a solution for when these assumptions fail.  Therefore, if for any reason you want to opt out of this "smart" handling of callbacks, simply use `.raw()`:
 
 ```javascript
-suspend(function* (resume, fileName) {
-    var data = yield fs.readFile(fileName, resume);
-    console.log(data[1].toString('utf8'));
-})(__filename);
+var suspend = require('suspend').raw();
+
+suspend(function* (resume) {
+    var res = yield fs.readFile(__filename, 'utf8', resume);
+    console.log(res);
+    // --> [null, '...file contents...']
+})();
+```
+
+As can be seen above, `suspend.raw()` provides "raw" access to all arguments passed to the callback.  No assumptions are made about the callback arguments and no errors will be thrown.  This behavior will apply to all yield expressions within the generator function.
+
+If `.raw()` behavior is required on just a single yield expression, `resume.raw()` may be used instead:
+
+```javascript
+var suspend = require('suspend');
+
+suspend(function* (resume) {
+    // use raw behavior for a single yield expression
+    console.log(yield fs.readFile(__filename, 'utf8', resume.raw()));
+    // --> [null, '...file contents...']
+
+    // behavior returns to normal for next yield expression
+    console.log(yield fs.readFile(__filename, 'utf8', resume));
+    // --> '...file contents...'
+})();
 ```
 
 ### What about Parallel Execution, Mapping, Etc.?
 
-More advanced flow constructs, in my opinion, already have pretty elegant solutions through libraries like [async](https://github.com/caolan/async/).  While I haven't ruled out support for these types of features in **suspend** itself, for now it is designed to be much more minimal, allowing you to layer on top of your existing control-flow libraries of choice.  For example, here's a modified snippet from the **async** README:
+More advanced flow constructs, in my opinion, have pretty elegant solutions through existing libraries like [async](https://github.com/caolan/async/).  While some basic parallelization support is planned, it is worth noting that suspend works quite nicely with your existing control flow library of choice.  For example, here's a modified snippet from the **async** README:
 
 ```
-// async without suspend
-async.map(['file1','file2','file3'], fs.stat, function(err, results){
-    // results is now an array of stats for each file
-});
-
-// async with suspend
-var res = yield async.map(['file1','file2','file3'], fs.stat, resume);
+suspend(function* (resume) {
+    var stats = yield async.map(['file1','file2','file3'], fs.stat, resume);
+})();
 ```
 
-This begins to illustrate why **suspend** is designed to interoperate with Node's existing callback semantics.  The goal isn't to replace your existing solutions - the goal is to simply and unobtrusively make them even better.
+This also begins to illustrate why suspend is designed to interoperate with Node's existing callback semantics - refactoring is simple and the new behavior is easy to reason about.
 
-### Error Handling
+## Versioning, Stability
 
-#### Default Behavior
+Please note that generators are currently only supported in unstable (v0.11.x) versions of Node, and suspend itself is very new.  While the API is still rapidly evolving, suspend does use [SemVer](http://semver.org/) for versioning, so you don't need to worry about the rug being pulled out from under you in a patch release.
 
-By default, **suspend** won't do anything fancy with errors.  If Node conventions are followed, errors returned from asynchronous methods will be passed as the first argument to the `resume` callback.  **suspend** won't make any assumptions about this, and will simply return the error in the first index of the results array.
+I would greatly appreciate any feedback, so if you find anything or have any suggestions, please open an issue (or email me at jmar777@gmail.com)!
 
-Using this default behavior, then, error handling is much the same as before:
+## Running Tests
 
-```javascript
-// without suspend
-fs.readFile(__filename, function(err, buffer) {
-    if (err) {
-        // handle error
-    }
-    console.log(buffer.toString('utf8'));
-});
-
-// with suspend
-var res = yield fs.readFile(__filename, resume);
-if (res[0]) {
-    // handle error
-}
-console.log(res[1].toString('utf8'));
 ```
-
-*Note: if the results array is driving you crazy, be sure to read to the end of the README.*
-
-#### Throw Behavior
-
-If for whatever reason you prefer to work with thrown exceptions instead, simply set the `throw` option to `true`:
-
-```javascript
-suspend(function* () {
-    try {
-        var res = yield fs.readFile(__filename, resume);
-        console.log(res[0].toString('utf8'));
-    } catch (err) {
-        // handle error
-    }
-}, { throw: true })();
+$ npm test
 ```
-
-When `throw` is set to `true`, if an error is passed to the `resume` callback (well, any non-null first parameter) it will be thrown instead of returned in the results array.  Also, since the error is no longer being returned in the results array, the non-error arguments begin at index 0 (instead of 1).
-
-## Hate the results array?
-
-*Me too, but bear with me...*
-
-Having to access results through an array is a bit of an eyesore.  There is a method to this madness, though.  This aspect of the API is eagerly waiting for [destructuring assignment](http://wiki.ecmascript.org/doku.php?id=harmony:destructuring) to be implemented in V8 (currently it has progressed to Draft ES6 Specification, just like generators).
-
-Once destructuring assignment is available, using **suspend** becomes even cleaner:
-
-```javascript
-// without destructuring assignment
-var res = yield fs.readFile(__filename, resume);
-// res[0] === error, res[1] === buffer
-
-// with destructuring assignment
-var [err, buffer] = yield fs.readFile(__filename, resume);
-// oh, that's nice...
-```
-
-So, as with all things, patience, and [a whole lot of nagging](https://code.google.com/p/v8/issues/detail?id=811). :)
-
-## Is `suspend` Ready To Be Used?
-
-Mmmm... probably not.  Currently generators are only supported in unstable (v0.11.x) versions of Node, and **suspend** itself is very new.  I'll be eating my own dog food with it in side projects, and I would much appreciate feedback from any early adopters.  If you find anything or have any suggestions, please open an issue (or email me at jmar777@gmail.com)!
-
-On a related note, **suspend** will adhere to [SemVer](http://semver.org/)-compliant version updates, so if you do happen to use it you won't have to worry about the rug being pulled out from under you.
 
 ## License 
 
