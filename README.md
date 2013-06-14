@@ -73,7 +73,7 @@ someEmitter.on('some-event', suspend(function* () {
 }));
 ```
 
-#### resume
+#### `resume`
 
 Given that the majority of the Node ecosystem uses callbacks to handle asynchronous operations, suspend provides a simple mechanism for interacting with node-style callbacks: `resume`.
 
@@ -132,7 +132,7 @@ suspend(function* (resume) {
 
 Note: if you prefer returned errors, instead of thrown, be sure to read the documentation below on `.raw()`.
 
-#### suspend.raw()
+#### `suspend.raw()`
 
 Suspend's default behavior assumes that...
 
