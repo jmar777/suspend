@@ -2,6 +2,8 @@
 
 **suspend** is a [generator](http://wiki.ecmascript.org/doku.php?id=harmony:generators)-based control-flow utility for Node that enables clean, pseudo-synchronous syntax for asynchronous interactions.  Specifically, suspend is a small abstraction around generators that is designed to "play nice" with Node's [callback conventions](http://docs.nodejitsu.com/articles/getting-started/control-flow/what-are-callbacks) and/or [promises](http://promises-aplus.github.io/promises-spec/).
 
+*Related reading: [What's the Big Deal with Generators?](http://devsmash.com/blog/whats-the-big-deal-with-generators)*
+
 ## Quick Examples
 
 *Working with node-style callbacks:*
