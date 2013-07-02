@@ -27,6 +27,18 @@ describe('suspend', function() {
 			done();
 		})();
 	});
+
+	it('should handle multiple runs', function(done) {
+		var test = suspend(function*(next, resume) {
+			var doubled = yield syncDouble(42, resume);
+			assert.strictEqual(doubled, 84);
+			next();
+		});
+
+		test(function() {
+			test(done);
+		});
+	});
 });
 
 // async functions used for test cases
