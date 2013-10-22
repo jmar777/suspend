@@ -96,7 +96,7 @@ Here's a suspend example that accepts a parameter before the `resume` argument:
 
 ```javascript
 var printFile = suspend(function* (fileName, resume) {
-    console.log(yield fs.readFile(filename, 'utf8', resume));
+    console.log(yield fs.readFile(fileName, 'utf8', resume));
 });
 
 printFile(__filename);
