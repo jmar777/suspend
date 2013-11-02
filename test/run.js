@@ -69,20 +69,22 @@ enqueue(convert, [
 ]);
 
 if (semver.gte(process.version, "0.11.2")) {
-	enqueue("echo", ["Running tests with --harmony-generators..."]);
-	enqueue("mocha", [
+	enqueue(console.log.bind(console), ["Running tests with --harmony-generators..."]);
+	enqueue("node", [
+		"node_modules/mocha/bin/mocha",
 		"--harmony-generators",
 		"--reporter", "list",
 		"./test/promises.js",
 		"./test/resume.js",
-		"./test/snafus.js",
+		"./test/snafus.js"
 	]);
 }
 
-enqueue("echo", ["Running tests with regenerator..."]);
-enqueue("mocha", [
+enqueue(console.log.bind(console), ["Running tests with regenerator..."]);
+enqueue("node", [
+	"node_modules/mocha/bin/mocha",
 	"--reporter", "list",
-	"./test/*.es5.js",
+	"./test/*.es5.js"
 ]);
 
 flush();
