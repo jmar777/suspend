@@ -6,7 +6,7 @@ var fs = require('fs'),
 
 // get our test files
 var testFiles = fs.readdirSync(__dirname).filter(function(fileName) {
-	return !/(?:^run|\.es5)\.js$/.test(fileName);
+	return fileName.slice(-3) === '.js' && !/(?:^run|\.es5)\.js$/.test(fileName);
 }).map(function(fileName) {
 	return './test/' + fileName;
 });
