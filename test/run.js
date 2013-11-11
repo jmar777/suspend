@@ -2,7 +2,7 @@ var fs = require('fs'),
 	semver = require('semver'),
 	regenerator = require('regenerator'),
 	spawn = require('child_process').spawn,
-	mochaArgs = ['--reporter', 'list'];
+	mochaArgs = ['./node_modules/mocha/bin/mocha', '--reporter', 'list'];
 
 // get our test files
 var testFiles = fs.readdirSync(__dirname).filter(function(fileName) {
@@ -29,7 +29,7 @@ if (semver.gte(process.version, '0.11.2')) {
 }
 
 // run the tests with mocha
-spawn('./node_modules/mocha/bin/mocha', mochaArgs, {
+spawn('node', mochaArgs, {
 	stdio: 'inherit'
 }).on('exit', function(err) {
 	if (err) {
