@@ -5,8 +5,8 @@
 	"keywords": ["async", "generator", "yield", "callback", "promise", "flow", "control", "suspend"],
 	"version": "0.3.1",
 	"repository": {
-		"type" : "git",
-		"url" : "git://github.com/jmar777/suspend.git"
+		"type": "git",
+		"url": "git://github.com/jmar777/suspend.git"
 	},
 	"main": "lib/suspend.js",
 	"scripts": {
@@ -16,7 +16,9 @@
 		"mocha": "1.11.x",
 		"q": "0.9.x",
 		"regenerator": "0.2.x",
-		"semver": "2.2.x"
+		"semver": "2.2.x",
+		"grunt": "~0.4.1",
+		"grunt-contrib-jshint": "~0.7.1"
 	},
 	"engines": {
 		"node": ">=0.11.2"
