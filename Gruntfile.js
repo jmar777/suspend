@@ -5,14 +5,15 @@ module.exports = function(grunt) {
 			options: {
 				camelcase: true,
 				eqeqeq: true,
-				es3: true,
 				undef: true,
 				unused: true,
 				trailing: true,
 				boss: true,
 				browser: true,
+				expr: true,
 				globals: {
-					jQuery: true
+					module: true,
+					setImmediate: true
 				}
 			}
 		}
