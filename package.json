@@ -3,7 +3,7 @@
 	"name": "suspend",
 	"description": "Callback-free control flow for node using ES6 generators.",
 	"keywords": ["async", "generator", "yield", "callback", "promise", "flow", "control", "suspend"],
-	"version": "0.3.1",
+	"version": "0.4.0-pre",
 	"repository": {
 		"type": "git",
 		"url": "git://github.com/jmar777/suspend.git"
@@ -21,7 +21,7 @@
 		"grunt-contrib-jshint": "~0.7.1"
 	},
 	"engines": {
-		"node": ">=0.11.2"
+		"node": ">=0.11.3"
 	},
 	"license": "MIT"
 }
