@@ -51,12 +51,17 @@ describe('suspend\'s resume API', function() {
 
 			suspend(function* (num) {
 				var doubled = yield asyncDouble(num, suspend.resume());
+				assert.strictEqual(doubled, 6);
 
-				suspend(function* () {
+				yield suspend(function* (next) {
 					var tripled = yield asyncTriple(doubled, suspend.resume());
 					assert.strictEqual(tripled, 18);
-					done();
-				})();
+					next();
+				})(suspend.resume());
+
+				var tripled = yield asyncTriple(doubled, suspend.resume());
+				assert.strictEqual(tripled, 18);
+				done();
 			})(3);
 		});
 
@@ -73,43 +78,31 @@ describe('suspend\'s resume API', function() {
 
 	});
 
-	// describe('with .raw()', function() {
-	// 	it('should provide results as an array', function(done) {
-	// 		suspend.raw()(function*() {
-	// 			var res = yield asyncDouble(42, suspend.resume());
-	// 			assert(Array.isArray(res));
-	// 			done();
-	// 		})();
-	// 	});
+	describe('with suspend.resumeRaw()', function() {
+		it('should provide results as an array', function(done) {
+			suspend(function* () {
+				var res = yield asyncDouble(42, suspend.resumeRaw());
+				assert(Array.isArray(res));
+				done();
+			})();
+		});
 
-	// 	it('should return errors as first item in array', function(done) {
-	// 		suspend.raw()(function* () {
-	// 			var res = yield asyncError(suspend.resume());
-	// 			assert.strictEqual(res[0].message, 'fail');
-	// 			done();
-	// 		})();
-	// 	});
+		it('should return errors as first item in array', function(done) {
+			suspend(function* () {
+				var res = yield asyncError(suspend.resumeRaw());
+				assert.strictEqual(res[0].message, 'fail');
+				done();
+			})();
+		});
 
-	// 	it('should return non-error results starting at index 1', function(done) {
-	// 		suspend.raw()(function* () {
-	// 			var res = yield asyncDouble(42, suspend.resume());
-	// 			assert.strictEqual(res[1], 84);
-	// 			done();
-	// 		})();
-	// 	});
-	// });
-
-	// describe('with resume.raw()', function() {
-	// 	it('should trigger .raw() behavior for a single yield expression', function(done) {
-	// 		suspend(function* () {
-	// 			var res = yield asyncDouble(42, suspend.resume().raw());
-	// 			assert(Array.isArray(res));
-	// 			var doubled = yield asyncDouble(42, suspend.resume());
-	// 			assert(typeof doubled === 'number');
-	// 			done();
-	// 		})();
-	// 	});
-	// });
+		it('should return non-error results starting at index 1', function(done) {
+			suspend(function* () {
+				var res = yield asyncDouble(42, suspend.resumeRaw());
+				assert.strictEqual(res[1], 84);
+				done();
+			})();
+		});
+	});
 });
 
 // async functions used for test cases
