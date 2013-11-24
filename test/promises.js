@@ -30,16 +30,6 @@ function asyncDouble(x) {
 	setTimeout(function() { deferred.resolve(x * 2); }, 20);
 	return deferred.promise;
 }
-function asyncTriple(x) {
-	var deferred = Q.defer();
-	setTimeout(function() { deferred.resolve(x * 3); }, 20);
-	return deferred.promise;
-}
-function asyncSquare(x) {
-	var deferred = Q.defer();
-	setTimeout(function() { deferred.resolve(x * x); }, 20);
-	return deferred.promise;
-}
 function asyncError() {
 	var deferred = Q.defer();
 	setTimeout(function() { deferred.reject(new Error('fail')); }, 20);

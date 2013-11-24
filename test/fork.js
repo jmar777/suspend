@@ -5,9 +5,9 @@ describe('suspend.fork()', function() {
 	it('should support concurrent operations', function(done) {
 		suspend(function* () {
 			asyncDouble(7, suspend.fork());
-			asyncTriple(7, suspend.fork());
-			asyncSquare(7, suspend.fork());
-			assert.deepEqual([14, 21, 49], yield suspend.join());
+			asyncDouble(8, suspend.fork());
+			asyncDouble(9, suspend.fork());
+			assert.deepEqual([14, 16, 18], yield suspend.join());
 			done();
 		})();
 	});
@@ -33,11 +33,11 @@ describe('suspend.fork()', function() {
 	it('should reset properly after a join()', function(done) {
 		suspend(function* () {
 			asyncDouble(3, suspend.fork());
-			asyncTriple(4, suspend.fork());
-			assert.deepEqual([6, 12], yield suspend.join());
 			asyncDouble(4, suspend.fork());
-			asyncTriple(3, suspend.fork());
-			assert.deepEqual([8, 9], yield suspend.join());
+			assert.deepEqual([6, 8], yield suspend.join());
+			asyncDouble(4, suspend.fork());
+			asyncDouble(3, suspend.fork());
+			assert.deepEqual([8, 6], yield suspend.join());
 			done();
 		})();
 	});
@@ -45,9 +45,9 @@ describe('suspend.fork()', function() {
 	it('should play nice with native control structures', function(done) {
 		suspend(function* () {
 			for (var i = 0; i < 10; i++) {
-				asyncSquare(i, suspend.fork());
+				asyncDouble(i, suspend.fork());
 			}
-			assert.deepEqual([0, 1, 4, 9, 16, 25, 36, 49, 64, 81],
+			assert.deepEqual([0, 2, 4, 6, 8, 10, 12, 14, 16, 18],
 				yield suspend.join());
 			done();
 		})();
@@ -60,13 +60,4 @@ function asyncDouble(x, cb) {
 }
 function slowAsyncDouble(x, cb) {
 	setTimeout(function() { cb(null, x * 2); }, 60);
-}
-function asyncTriple(x, cb) {
-	setTimeout(function() { cb(null, x * 3); }, 20);
-}
-function asyncSquare(x, cb) {
-	setTimeout(function() { cb(null, x * x); }, 20);
-}
-function asyncError(cb) {
-	setTimeout(function() { cb(new Error('fail')); }, 20);
 }

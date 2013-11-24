@@ -22,17 +22,17 @@ describe('suspend(fn*)', function() {
 
 		suspend(function* (num) {
 			var doubled = yield asyncDouble(num),
-				tripled = yield asyncTriple(doubled),
-				squared = yield asyncSquare(tripled);
-			assert.strictEqual(324, squared);
+				quadrupled = yield asyncDouble(doubled),
+				octupled = yield asyncDouble(quadrupled);
+			assert.strictEqual(24, octupled);
 			++doneCount === 2 && done();
 		})(3);
 
 		suspend(function* (num) {
-			var squared = yield asyncSquare(num),
-				tripled = yield asyncTriple(squared),
-				doubled = yield asyncDouble(tripled);	
-			assert.strictEqual(54, doubled);
+			var doubled = yield asyncDouble(num),
+				quadrupled = yield asyncDouble(doubled),
+				octupled = yield asyncDouble(quadrupled);	
+			assert.strictEqual(24, octupled);
 			++doneCount === 2 && done();
 		})(3);
 	});
@@ -40,10 +40,10 @@ describe('suspend(fn*)', function() {
 	it('should support nesting', function(done) {
 		suspend(function* (num) {
 			suspend(function* (num2) {
-				assert.strictEqual(18, yield asyncTriple(num2));
+				assert.strictEqual(20, yield asyncDouble(num2));
 				done();
 			})(yield asyncDouble(num));
-		})(3);
+		})(5);
 	});
 });
 
@@ -51,20 +51,5 @@ describe('suspend(fn*)', function() {
 function asyncDouble(x) {
 	var deferred = Q.defer();
 	setTimeout(function() { deferred.resolve(x * 2); }, 20);
-	return deferred.promise;
-}
-function asyncTriple(x) {
-	var deferred = Q.defer();
-	setTimeout(function() { deferred.resolve(x * 3); }, 20);
-	return deferred.promise;
-}
-function asyncSquare(x) {
-	var deferred = Q.defer();
-	setTimeout(function() { deferred.resolve(x * x); }, 20);
-	return deferred.promise;
-}
-function asyncError() {
-	var deferred = Q.defer();
-	setTimeout(function() { deferred.reject(new Error('fail')); }, 20);
 	return deferred.promise;
 }

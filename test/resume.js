@@ -53,12 +53,6 @@ describe('suspend(fn*)', function() {
 function asyncDouble(x, cb) {
 	setTimeout(function() { cb(null, x * 2); }, 20);
 }
-function asyncTriple(x, cb) {
-	setTimeout(function() { cb(null, x * 3); }, 20);
-}
-function asyncSquare(x, cb) {
-	setTimeout(function() { cb(null, x * x); }, 20);
-}
 function asyncError(cb) {
 	setTimeout(function() { cb(new Error('fail')); }, 20);
 }
