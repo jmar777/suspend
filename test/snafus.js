@@ -1,8 +1,9 @@
 var assert = require('assert'),
-	suspend = require('../');
+	suspend = require('../'),
+	resume = suspend.resume;
 
-describe('suspend', function() {
-	it('should throw a descriptive error on multiple calls to resume()', function(done) {
+describe('suspend(fn*)', function() {
+	it('should be descriptive on multiple calls to resume()', function(done) {
 		suspend(function* () {
 			// temporarily hijack uncaught errors
 			var mochaListener = process.listeners('uncaughtException')[0];
@@ -20,11 +21,22 @@ describe('suspend', function() {
 			}
 			process.on('uncaughtException', newListener);
 
-			yield evilCallback(suspend.resume());
+			yield evilCallback(resume());
 		})();
 	});
 
-	it('should throw a descriptive error when resume() is called outside of the generator body', function(done) {
+	it('should throw an error when resume factory is called without a yield', function(done) {
+		try {
+			resume();
+		} catch (err) {
+			if (!/called from the generator body/.test(err.message)) {
+				return done(new Error('Expected a descriptive error message'));
+			}
+			done();
+		}
+	});
+
+	it('should be descriptive when resume factory is called asynchronously', function(done) {
 		suspend(function* () {
 			// temporarily hijack uncaught errors
 			var mochaListener = process.listeners('uncaughtException')[0];
@@ -43,14 +55,14 @@ describe('suspend', function() {
 			process.on('uncaughtException', newListener);
 
 			yield asyncDouble(2, function() {
-				suspend.resume()();
+				resume();
 			});
 		})();
 	});
 
 	it('should handle synchronous results', function(done) {
 		suspend(function* () {
-			var doubled = yield syncDouble(42, suspend.resume());
+			var doubled = yield syncDouble(42, resume());
 			assert.strictEqual(doubled, 84);
 			done();
 		})();
@@ -58,7 +70,7 @@ describe('suspend', function() {
 
 	it('should handle multiple runs', function(done) {
 		var test = suspend(function* (next) {
-			var doubled = yield syncDouble(42, suspend.resume());
+			var doubled = yield syncDouble(42, resume());
 			assert.strictEqual(doubled, 84);
 			next();
 		});

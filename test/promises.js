@@ -2,76 +2,25 @@ var assert = require('assert'),
 	suspend = require('../'),
 	Q = require('q');
 
-describe('suspend\'s promise API', function() {
-
-	describe('with default options', function() {
-		it('should resolve node-style callbacks', function(done) {
+describe('suspend(fn*)', function() {
+	describe('with promises', function() {
+		it('should resolve correctly', function(done) {
 			suspend(function*() {
-				var doubled = yield asyncDouble(42);
-				assert.strictEqual(doubled, 84);
+				assert.strictEqual(84, yield asyncDouble(42));
 				done();
 			})();
 		});
 
-		it('should allow arguments to be passed on initialization', function(done) {
-			suspend(function*(foo) {
-				assert.strictEqual(foo, 'bar');
-				done();
-			})('bar');
-		});
-
-		it('should preserve initializer context for the generator body', function(done) {
-			suspend(function*() {
-				assert.strictEqual(this.foo, 'bar');
-				done();
-			}).apply({ foo: 'bar' });
-		});
-
-		it('should work with multiple generators in parallel', function(done) {
-			var doneCount = 0;
-
-			suspend(function* (num) {
-				var doubled = yield asyncDouble(num);
-				var tripled = yield asyncTriple(doubled);
-				var squared = yield asyncSquare(tripled);
-				assert.strictEqual(squared, 324);
-				++doneCount === 2 && done();
-			})(3);
-
-			suspend(function* (num) {
-				var squared = yield asyncSquare(num);
-				var tripled = yield asyncTriple(squared);
-				var doubled = yield asyncDouble(tripled);	
-				assert.strictEqual(doubled, 54);
-				++doneCount === 2 && done();
-			})(3);
-		});
-
-		it('should work when nested', function(done) {
-			var doneCount = 0;
-
-			suspend(function* (num) {
-				var doubled = yield asyncDouble(num);
-
-				suspend(function* () {
-					var tripled = yield asyncTriple(doubled);
-					assert.strictEqual(tripled, 18);
-					done();
-				})();
-			})(3);
-		});
-
-		it('should throw errors returned from async functions', function(done) {
+		it('should throw errors', function(done) {
 			suspend(function* () {
 				try {
 					yield asyncError();
 				} catch (err) {
-					assert.strictEqual(err.message, 'fail');
+					assert.strictEqual('fail', err.message);
 					done();
 				}
-			}, { throw: true })();
+			})();
 		});
-
 	});
 });
 

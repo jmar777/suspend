@@ -1,104 +1,48 @@
 var assert = require('assert'),
-	suspend = require('../');
+	suspend = require('../'),
+	resume = suspend.resume,
+	resumeRaw = suspend.resumeRaw;
 
-describe('suspend\'s resume API', function() {
-
-	describe('with default options', function() {
-		it('should resolve node-style callbacks', function(done) {
+describe('suspend(fn*)', function() {
+	describe('with suspend.resume()', function() {
+		it('should resolve correctly', function(done) {
 			suspend(function* () {
-				var doubled = yield asyncDouble(42, suspend.resume());
-				assert.strictEqual(doubled, 84);
+				assert.strictEqual(84, yield asyncDouble(42, resume()));
 				done();
 			})();
 		});
 
-		it('should allow arguments to be passed on initialization', function(done) {
-			suspend(function* (foo) {
-				assert.strictEqual(foo, 'bar');
-				done();
-			})('bar');
-		});
-
-		it('should preserve initializer context for the generator body', function(done) {
-			suspend(function* () {
-				assert.strictEqual(this.foo, 'bar');
-				done();
-			}).apply({ foo: 'bar' });
-		});
-
-		it('should work with multiple generators in parallel', function(done) {
-			var doneCount = 0;
-
-			suspend(function* (num) {
-				var doubled = yield asyncDouble(num, suspend.resume());
-				var tripled = yield asyncTriple(doubled, suspend.resume());
-				var squared = yield asyncSquare(tripled, suspend.resume());
-				assert.strictEqual(squared, 324);
-				++doneCount === 2 && done();
-			})(3);
-
-			suspend(function* (num) {
-				var squared = yield asyncSquare(num, suspend.resume());
-				var tripled = yield asyncTriple(squared, suspend.resume());
-				var doubled = yield asyncDouble(tripled, suspend.resume());	
-				assert.strictEqual(doubled, 54);
-				++doneCount === 2 && done();
-			})(3);
-		});
-
-		it('should work when nested', function(done) {
-			var doneCount = 0;
-
-			suspend(function* (num) {
-				var doubled = yield asyncDouble(num, suspend.resume());
-				assert.strictEqual(doubled, 6);
-
-				yield suspend(function* (next) {
-					var tripled = yield asyncTriple(doubled, suspend.resume());
-					assert.strictEqual(tripled, 18);
-					next();
-				})(suspend.resume());
-
-				var tripled = yield asyncTriple(doubled, suspend.resume());
-				assert.strictEqual(tripled, 18);
-				done();
-			})(3);
-		});
-
-		it('should throw errors returned from async functions', function(done) {
+		it('should throw errors', function(done) {
 			suspend(function* () {
 				try {
-					yield asyncError(suspend.resume());
+					yield asyncError(resume());
 				} catch (err) {
 					assert.strictEqual(err.message, 'fail');
 					done();
 				}
-			}, { throw: true })();
+			})();
 		});
-
 	});
 
 	describe('with suspend.resumeRaw()', function() {
-		it('should provide results as an array', function(done) {
+		it('should resolve to an array', function(done) {
 			suspend(function* () {
-				var res = yield asyncDouble(42, suspend.resumeRaw());
-				assert(Array.isArray(res));
+				assert(Array.isArray(yield asyncDouble(42, resumeRaw())));
+				done();
+			})();
+		});
+
+		it('should resolve correctly', function(done) {
+			suspend(function* () {
+				assert.deepEqual([null, 14], yield asyncDouble(7, resumeRaw()));
 				done();
 			})();
 		});
 
 		it('should return errors as first item in array', function(done) {
 			suspend(function* () {
-				var res = yield asyncError(suspend.resumeRaw());
-				assert.strictEqual(res[0].message, 'fail');
-				done();
-			})();
-		});
-
-		it('should return non-error results starting at index 1', function(done) {
-			suspend(function* () {
-				var res = yield asyncDouble(42, suspend.resumeRaw());
-				assert.strictEqual(res[1], 84);
+				var res = yield asyncError(resumeRaw());
+				assert.strictEqual('fail', res[0].message);
 				done();
 			})();
 		});

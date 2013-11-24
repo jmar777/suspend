@@ -1,8 +1,8 @@
 var assert = require('assert'),
 	suspend = require('../');
 
-describe('suspend\'s fork API', function() {
-	it('should allow multiple async operations in parallel', function(done) {
+describe('suspend.fork()', function() {
+	it('should support concurrent operations', function(done) {
 		suspend(function* () {
 			asyncDouble(7, suspend.fork());
 			asyncTriple(7, suspend.fork());
@@ -12,7 +12,7 @@ describe('suspend\'s fork API', function() {
 		})();
 	});
 
-	it('should preserve result order based on calls to fork()', function(done) {
+	it('should order results based on calls to fork()', function(done) {
 		suspend(function* () {
 			slowAsyncDouble(3, suspend.fork());
 			asyncDouble(4, suspend.fork());
@@ -52,7 +52,6 @@ describe('suspend\'s fork API', function() {
 			done();
 		})();
 	});
-
 });
 
 // async functions used for test cases
