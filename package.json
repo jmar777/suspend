@@ -10,13 +10,13 @@
 	},
 	"main": "lib/suspend.js",
 	"scripts": {
-		"test": "node test/run.js"
+		"test": "node ./node_modules/mocha/bin/mocha --harmony-generators --reporter list",
+		"test-es5": "node test-es5/run.js"
 	},
 	"devDependencies": {
 		"mocha": "1.11.x",
 		"q": "0.9.x",
 		"regenerator": "0.2.x",
-		"semver": "2.2.x",
 		"grunt": "~0.4.1",
 		"grunt-contrib-jshint": "~0.7.1"
 	},
