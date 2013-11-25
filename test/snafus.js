@@ -5,22 +5,12 @@ var assert = require('assert'),
 describe('suspend(fn*)', function() {
 	it('should be descriptive on multiple calls to resume()', function(done) {
 		suspend(function* () {
-			// temporarily hijack uncaught errors
-			var mochaListener = process.listeners('uncaughtException')[0];
-			process.removeListener('uncaughtException', mochaListener);
-			var newListener = function(err) {
-				// restore mocha's listener
-				process.removeListener('uncaughtException', newListener);
-				process.on('uncaughtException', mochaListener);
-
+			captureNextUncaughtException(function(err) {
 				if (!/same resumer multiple times/.test(err.message)) {
 					return done(new Error('Expected a descriptive error message'));
 				}
-
 				done();
-			}
-			process.on('uncaughtException', newListener);
-
+			});
 			yield evilCallback(resume());
 		})();
 	});
@@ -38,22 +28,12 @@ describe('suspend(fn*)', function() {
 
 	it('should be descriptive when resume factory is called asynchronously', function(done) {
 		suspend(function* () {
-			// temporarily hijack uncaught errors
-			var mochaListener = process.listeners('uncaughtException')[0];
-			process.removeListener('uncaughtException', mochaListener);
-			var newListener = function(err) {
-				// restore mocha's listener
-				process.removeListener('uncaughtException', newListener);
-				process.on('uncaughtException', mochaListener);
-
+			captureNextUncaughtException(function(err) {
 				if (!/called from the generator body/.test(err.message)) {
 					return done(new Error('Expected a descriptive error message'));
 				}
-
 				done();
-			}
-			process.on('uncaughtException', newListener);
-
+			});	
 			yield asyncDouble(2, function() {
 				resume();
 			});
@@ -91,4 +71,15 @@ function evilCallback(cb) {
 }
 function syncDouble(x, cb) {
 	cb(null, x * 2);
+}
+function captureNextUncaughtException(cb) {
+	var mochaListener = process.listeners('uncaughtException')[0];
+	process.removeListener('uncaughtException', mochaListener);
+	var newListener = function(err) {
+		// restore mocha's listener
+		process.removeListener('uncaughtException', newListener);
+		process.on('uncaughtException', mochaListener);
+		cb(err);
+	}
+	process.on('uncaughtException', newListener);
 }
