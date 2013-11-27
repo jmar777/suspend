@@ -45,11 +45,29 @@ describe('suspend(fn*)', function() {
 			})(yield asyncDouble(num));
 		})(5);
 	});
+
+	it('should support continuing execution after a handled error', function(done) {
+		suspend(function* (num) {
+			var doubled = yield asyncDouble(num);
+			try {
+				yield asyncError();
+			} catch (err) {
+				// ignore
+			}
+			assert.strictEqual(28, yield asyncDouble(doubled));
+			done();
+		})(7);
+	});
 });
 
 // async functions used for test cases
 function asyncDouble(x) {
 	var deferred = Q.defer();
 	setTimeout(function() { deferred.resolve(x * 2); }, 20);
+	return deferred.promise;
+}
+function asyncError() {
+	var deferred = Q.defer();
+	setTimeout(function() { deferred.reject(new Error('fail')); }, 20);
 	return deferred.promise;
 }
