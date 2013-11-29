@@ -14,9 +14,20 @@ describe('suspend(fn*)', function() {
 		});
 	});
 
-	it('should pass uncaught errors to callbacks', function(done) {
+	it('should pass uncaught synchronous errors to callbacks', function(done) {
 		var test = suspend(function* () {
 			throw new Error('fail');
+		});
+
+		test(function(err) {
+			assert.strictEqual('fail', err.message);
+			done();
+		});
+	});
+
+	it('should pass uncaught asynchronous errors to callbacks', function(done) {
+		var test = suspend(function* () {
+			yield asyncError();
 		});
 
 		test(function(err) {
@@ -30,5 +41,10 @@ describe('suspend(fn*)', function() {
 function asyncDouble(x) {
 	var deferred = Q.defer();
 	setTimeout(function() { deferred.resolve(x * 2); }, 20);
+	return deferred.promise;
+}
+function asyncError() {
+	var deferred = Q.defer();
+	setTimeout(function() { deferred.reject(new Error('fail')); }, 20);
 	return deferred.promise;
 }
