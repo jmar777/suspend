@@ -42,6 +42,39 @@ describe('suspend.fn(fn*)()', function() {
 			done();
 		})('bar');
 	});
+
+	it('should handle multiple runs in series', function(done) {
+		var test = fn(function*(next) {
+			assert.strictEqual(84, yield asyncDouble(42, resume()));
+			next();
+		});
+
+		test(function() {
+			test(done);
+		});
+	});
+
+	it('should handle multiple runs in parallel', function(done) {
+		var doneCount = 0,
+			maybeDone = function() { ++doneCount === 2 && done() };
+
+		var test = fn(function*(next) {
+			assert.strictEqual(84, yield asyncDouble(42, resume()));
+			next();
+		});
+
+		test(maybeDone);
+		test(maybeDone);
+	});
+
+	it('should support continuing execution after a handled error', function(done) {
+		fn(function*() {
+			var doubled = yield asyncDouble(7, resume());
+			try { yield asyncError(resume()); } catch (err) {}
+			assert.strictEqual(28, yield asyncDouble(doubled, resume()));
+			done();
+		})();
+	});
 });
 
 // functions used for test cases

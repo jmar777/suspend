@@ -26,6 +26,14 @@ describe('suspend.run(fn*)', function() {
 		assert.throws(run.bind(null, 'foo'), /must be a GeneratorFunction/);
 		done();
 	});
+
+	it('should support continuing execution after a handled error', function(done) {
+		run(function*() {
+			var doubled = yield asyncDouble(7, resume());
+			try { yield asyncError(resume()); } catch (err) {}
+			assert.strictEqual(28, yield asyncDouble(doubled, resume()));
+		}, done);
+	});
 });
 
 describe('suspend.run(fn*, cb)', function() {

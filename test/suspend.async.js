@@ -59,6 +59,36 @@ describe('suspend.async(fn*)()', function() {
 		})('bar', done);
 	});
 
+	it('should handle multiple runs in series', function(done) {
+		var test = async(function*() {
+			assert.strictEqual(84, yield asyncDouble(42, resume()));
+		});
+
+		test(function() {
+			test(done);
+		});
+	});
+
+	it('should handle multiple runs in parallel', function(done) {
+		var doneCount = 0,
+			maybeDone = function() { ++doneCount === 2 && done() };
+
+		var test = async(function*() {
+			assert.strictEqual(84, yield asyncDouble(42, resume()));
+		});
+
+		test(maybeDone);
+		test(maybeDone);
+	});
+
+	it('should support continuing execution after a handled error', function(done) {
+		async(function*() {
+			var doubled = yield asyncDouble(7, resume());
+			try { yield asyncError(resume()); } catch (err) {}
+			assert.strictEqual(28, yield asyncDouble(doubled, resume()));
+		})(done);
+	});
+
 	it('should pass synchronously returned values to callback', function(done) {
 		async(function*() {
 			return 3;
