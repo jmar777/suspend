@@ -14,11 +14,11 @@
 		"test-es5": "node test-es5/run.js"
 	},
 	"devDependencies": {
-		"mocha": "1.11.x",
-		"q": "0.9.x",
-		"regenerator": "0.2.x",
-		"grunt": "~0.4.1",
-		"grunt-contrib-jshint": "~0.7.1"
+		"mocha": "~1.15.1",
+		"q": "~0.9.7",
+		"regenerator": "~0.3.1",
+		"grunt": "~0.4.2",
+		"grunt-contrib-jshint": "~0.7.2"
 	},
 	"engines": {
 		"node": ">=0.11.3"
