@@ -33,8 +33,8 @@ describe('suspend.async(fn*)()', function() {
 		async(function*() {})(done);
 	});
 
-	it('should let callback be optional when no arguments are provided', function(done) {
-		assert.doesNotThrow(async(function*() {}));
+	it('should throw if callback argument is missing', function(done) {
+		assert.throws(async(function*() {}), /must be a callback/);
 		done();
 	});
 
@@ -49,8 +49,7 @@ describe('suspend.async(fn*)()', function() {
 	it('should preserve `this` binding', function(done) {
 		async(function*() {
 			assert.strictEqual('bar', this.foo);
-			done();
-		}).call({ foo: 'bar' });
+		}).call({ foo: 'bar' }, done);
 	});
 
 	it('should support input parameters', function(done) {
