@@ -4,7 +4,7 @@
 
 *Related reading for the generator-uninitiated: [What's the Big Deal with Generators?](http://devsmash.com/blog/whats-the-big-deal-with-generators)*
 
-**Note:** Generators are a new feature in ES6 and are still hidden behind a flag in V8.  To enable them, simply use the `--harmony-generators` (or the more general `--harmony`) flag:
+**Note:** Generators are a new feature in ES6 and are still hidden behind the `--harmony-generators` (or the more general `--harmony`) flag in V8:
 
 ```
 $ node --harmony-generators your-script.js
@@ -166,7 +166,7 @@ suspend(function*() {
 
 As was previously mentioned, suspend is also designed to play nice with promises.  In fact, promises and suspend make a particularly nice combination, as it completely alleviates the need for callbacks (or `resume()`).  To use suspend with promises, simply `yield` the promise itself.
 
-** Example:**
+**Example:**
 
 ```javascript
 suspend(function*() {
