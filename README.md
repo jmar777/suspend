@@ -293,6 +293,12 @@ Feedback is greatly appreciated, so if you find anything or have any suggestions
 $ npm test
 ```
 
+Bonus: thanks to [Ben Newman](https://github.com/benjamn), the full suspend test suite can also be run in pre-v0.11.x versions of Node (using [regenerator](http://facebook.github.io/regenerator/)):
+
+```
+$ npm run-script test-es5
+```
+
 ## Credits
 
 A special thanks to [Gorgi Kosev](http://spion.github.io/) for his consistently valuable feedback on suspend's API (and sundry related topics).
