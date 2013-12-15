@@ -1,6 +1,8 @@
 # suspend
 
-**suspend** is a [generator](http://wiki.ecmascript.org/doku.php?id=harmony:generators)-based control-flow library for Node that enables asynchronous code to be written in a clean, callback-free manner.  Suspend is specifically designed to work well with Node's [callback conventions](#suspendresume) and [promises](#promises), although it is also compatible with code that follows [neither convention](#suspendresumeraw).
+[Generator](http://wiki.ecmascript.org/doku.php?id=harmony:generators)-based control-flow for Node enabling asynchronous code without callbacks, transpiling, or selling your soul.
+
+Suspend is designed to work seamlessly with Node's [callback conventions](#suspendresume) and [promises](#promises), but is also compatible with code that follows [neither convention](#suspendresumeraw).
 
 *Related reading for the generator-uninitiated: [What's the Big Deal with Generators?](http://devsmash.com/blog/whats-the-big-deal-with-generators)*
 
@@ -61,7 +63,7 @@ $ npm install suspend
 
 ### `suspend.async(fn*)`
 
-Accepts a generator function `fn*`, and returns a wrapper function that follows [Node's callback conventions](http://docs.nodejitsu.com/articles/getting-started/control-flow/what-are-callbacks).  Note that the wrapper function requires the callback as the last parameter.
+Accepts a generator function `fn*`, and returns a wrapper function that follows [Node's callback conventions](http://docs.nodejitsu.com/articles/getting-started/control-flow/what-are-callbacks).  Note that the wrapper function requires a callback as the last parameter.
 
 **Example:**
 
@@ -77,7 +79,7 @@ readJsonFile('package.json', function(err, packageData) {
 });
 ```
 
-Note that any uncaught errors will be passed to the callback as the error argument (see the section on [error handling](#error-handling) for more information).
+Note that `.async()` lets you return your final result, instead of having to explicitly accept a callback parameter and pass the result manually.  Likewise, any uncaught errors will be passed to the callback as the error argument (see the section on [error handling](#error-handling) for more information).
 
 ---
 
