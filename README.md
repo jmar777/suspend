@@ -2,7 +2,7 @@
 
 [Generator](http://wiki.ecmascript.org/doku.php?id=harmony:generators)-based control-flow for Node enabling asynchronous code without callbacks, transpiling, or selling your soul.
 
-Suspend is designed to work seamlessly with Node's [callback conventions](#suspendresume) and [promises](#promises), but is also compatible with code that follows [neither convention](#suspendresumeraw).
+Suspend is designed to work seamlessly with Node's [callback conventions](#suspendresume), [promises](#promises), and [thunks](#thunks), but is also compatible with code that follows [other conventions](#suspendresumeraw).
 
 *Related reading for the generator-uninitiated: [What's the Big Deal with Generators?](http://devsmash.com/blog/whats-the-big-deal-with-generators)*
 
@@ -37,6 +37,18 @@ suspend(function*() {
 })();
 ```
 
+*Working with thunks:*
+
+```javascript
+var suspend = require('suspend'),
+    readFile = require('thunkify')(require('fs').readFile);
+
+suspend(function*() {
+    var package = JSON.parse(yield readFile('package.json', 'utf8'));
+    console.log(package.name);
+});
+```
+
 ## Installation
 
 ```
@@ -54,6 +66,7 @@ $ npm install suspend
     * [suspend.resume()](#suspendresume)
     * [suspend.resumeRaw()](#suspendresumeraw)
     * [Promises](#promises)
+    * [Thunks](#thunks)
 * **[Parallel Operations](#parallel-operations)**
     * [suspend.fork() and suspend.join()](#suspendfork-and-suspendjoin)
     * [Combining with Other Control-Flow Libraries](#combining-with-other-control-flow-libraries)
@@ -127,7 +140,7 @@ The `yield` keyword is a new language feature associated with generators in ES6.
 
 In suspend, as the name implies, we use `yield` to suspend the generator while performing asynchronous operations, and then resume it once the operation is complete.
 
-If you're using promises, [suspend can resume for you automatically](#promises).  However, given that the majority of the Node ecosystem relies on callbacks, suspend provides some simple mechanisms for interacting with callback-based code: [`resume()`](#suspendresume) and [`resumeRaw()`](#suspendresumeraw).
+If you're using [promises](#promises) or [thunks](#thunks), suspend can resume for you automatically.  However, given that the majority of the Node ecosystem relies on callbacks, suspend provides some simple mechanisms for interacting with callback-based code: [`resume()`](#suspendresume) and [`resumeRaw()`](#suspendresumeraw).
 
 ---
 
@@ -178,6 +191,24 @@ suspend(function*() {
 
 The above is an example of working with [mongoose](http://mongoosejs.com/), which returns promises for asynchronous operations.  If a yield expression evaluates to a ["thenable"](https://github.com/promises-aplus/promises-spec#terminology), then suspend can figure out the rest.
 
+---
+
+### Thunks
+
+Thunks provide a nice, lightweight alternative to promises when working with generators.  Sometimes referred to as continuables, thunks are simply functions returned from asynchronous operations, that accept a single node-style callback parameter.  For creating "thunkified" versions of asynchronous functions, I recommend TJ Holowaychuk's [thunkify](https://github.com/visionmedia/node-thunkify) module.
+
+**Example:**
+
+```javascript
+var readFile = thunkify(fs.readFile);
+
+suspend(function*() {
+    var data = yield readFile(__filename, 'utf8');
+});
+```
+
+As can be seen, one must simply yield the thunk itself and suspend will appropriately handle the eventual result or error.  Just like with promises, thunks and suspend make a particularly nice combination, as once again there's no need to pass in `resume()` or other callback mechanism into the async function itself.
+
 ## Parallel Operations
 
 While yielding is a convenient way to wait for an operation to complete, it does force things to be executed in series.  Sometimes, however, we wish to do things in parallel. In suspend, parallel operations are made easy with `fork()` and `join()`.
@@ -226,7 +257,7 @@ suspend(function*() {
 
 ## Error Handling
 
-Suspend allows us to handle both synchronous and asynchronous errors the same.  Whenever an error is passed to the `resume()` callback (or a promise resolves to an error) that error is thrown at the site of the `yield` expression.  This allows us to use native try/catches to handle errors, regardless of whether they occurred synchronously or asynchronously.
+Suspend allows us to handle both synchronous and asynchronous errors the same.  Whenever an error is passed to the `resume()` callback, or a promise or thunk resolves to an error, that error is thrown at the site of the `yield` expression.  This allows us to use native try/catches to handle errors, regardless of whether they occurred synchronously or asynchronously.
 
 **Example:**
 
