@@ -22,10 +22,9 @@ describe('suspend.fork()', function() {
 		}, done);
 	});
 
-	it('should support calling fork()(err, val) manually', function(done) {
+	it('should support synchronous fork() resolution', function(done) {
 		run(function*() {
-			for (var i = 0; i < 5; i ++)
-				fork()(null, i);
+			for (var i = 0; i < 5; i++) fork()(null, i);
 			assert.deepEqual([0, 1, 2, 3, 4], yield join());
 		}, done);
 	})
