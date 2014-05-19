@@ -22,6 +22,14 @@ describe('suspend.fork()', function() {
 		}, done);
 	});
 
+	it('should support calling fork()(err, val) manually', function(done) {
+		run(function*() {
+			for (var i = 0; i < 5; i ++)
+				fork()(null, i);
+			assert.deepEqual([0, 1, 2, 3, 4], yield join());
+		}, done);
+	})
+
 	it('should support join() even with no forks()\'s', function(done) {
 		run(function*() {
 			var res = yield join();
