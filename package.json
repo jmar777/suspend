@@ -13,9 +13,11 @@
 		"test": "node ./node_modules/mocha/bin/mocha --harmony-generators --reporter list",
 		"test-es5": "node test-es5/run.js"
 	},
+	"dependencies": {
+		"promise": "^6.0.0"
+	},
 	"devDependencies": {
 		"mocha": "~1.15.1",
-		"q": "~0.9.7",
 		"regenerator": "~0.3.1",
 		"grunt": "~0.4.2",
 		"grunt-contrib-jshint": "~0.7.2"
