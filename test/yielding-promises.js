@@ -1,7 +1,7 @@
 var assert = require('assert'),
 	suspend = require('../'),
 	run = suspend.run,
-	Q = require('q');
+	Promise = require('../node_modules/promise/lib/es6-extensions');
 
 describe('yielded promises', function() {
 	it('should resolve correctly', function(done) {
@@ -55,17 +55,17 @@ describe('yielded promises', function() {
 
 // functions used for test cases
 function asyncDouble(num) {
-	var deferred = Q.defer();
-	setTimeout(function() { deferred.resolve(num * 2); }, 20);
-	return deferred.promise;
+	return new Promise(function(resolve, reject) {
+		setTimeout(resolve.bind(null, num * 2), 20);
+	});
 }
 function slowAsyncDouble(num) {
-	var deferred = Q.defer();
-	setTimeout(function() { deferred.resolve(num * 2); }, 40);
-	return deferred.promise;
+	return new Promise(function(resolve, reject) {
+		setTimeout(resolve.bind(null, num * 2), 40);
+	});
 }
 function asyncError() {
-	var deferred = Q.defer();
-	setTimeout(function() { deferred.reject(new Error('oops')); }, 20);
-	return deferred.promise;
+	return new Promise(function(resolve, reject) {
+		setTimeout(reject.bind(null, new Error('oops')), 20);
+	});
 }
