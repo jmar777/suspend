@@ -74,7 +74,7 @@ describe('suspend.promise(fn*)()', function() {
 		})().then(done);
 	});
 
-	it('should pass synchronously returned values to callback', function(done) {
+	it('should resolve promise with synchronously returned values', function(done) {
 		suspend.promise(function*() {
 			return 3;
 		})().then(function(val) {
@@ -83,7 +83,7 @@ describe('suspend.promise(fn*)()', function() {
 		});
 	});
 
-	it('should pass asynchronously resolved values to callback', function(done) {
+	it('should resolve promise with asynchronously returned values', function(done) {
 		suspend.promise(function*() {
 			return yield asyncDouble(3);
 		})().then(function(val) {
@@ -92,7 +92,7 @@ describe('suspend.promise(fn*)()', function() {
 		});
 	});
 
-	it('should pass synchronously thrown errors to callback', function(done) {
+	it('should reject promise with synchronously thrown errors', function(done) {
 		suspend.promise(function*() {
 			throw new Error('oops');
 		})().then(noop, function(err) {
@@ -101,7 +101,7 @@ describe('suspend.promise(fn*)()', function() {
 		});
 	});
 
-	it('should pass unhandled asynchronous errors to callback', function(done) {
+	it('should pass reject promise with asynchronously thrown errors', function(done) {
 		suspend.promise(function*() {
 			yield asyncError();
 		})().then(noop, function(err) {
