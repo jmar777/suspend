@@ -59,8 +59,10 @@ $ npm install suspend
 
 * **[API](#api)**
     * [suspend.async(fn*)](#suspendasyncfn)
+    * [suspend.promise(fn*)](#suspendpromisefn)
     * [suspend.fn(fn*)](#suspendfnfn)
     * [suspend.run(fn*)](#suspendrunfn-cb)
+    * [suspend(fn*)](#suspendfn)
 * **[Suspending and Resuming Execution](#suspending-and-resuming-execution)**
     * [yield](#yield)
     * [suspend.resume()](#suspendresume)
@@ -93,6 +95,26 @@ readJsonFile('package.json', function(err, packageData) {
 ```
 
 Note that `.async()` lets you return your final result, instead of having to explicitly accept a callback parameter and pass the result manually.  Likewise, any uncaught errors will be passed to the callback as the error argument (see the section on [error handling](#error-handling) for more information).
+
+---
+
+### `suspend.promise(fn*)`
+
+Accepts a generator function `fn*`, and returns a wrapper function that returns a Promise.  If a value is returned (or the generator function completes with no explicit return value), the promise is resolved.  If an error is thrown, then the promise is rejected.
+
+**Example:**
+
+```javascript
+var getFavoriteNumberByUsername = suspend.promise(function*(username) {
+    var user = yield UserModel.find({ username: username });
+    return user.favoriteColor;
+});
+
+// the resulting function exposes a promise API:
+var promise = getFavoriteNumberByUsername('jmar777');
+```
+
+Note that the above example also demonstrates the ability to yield promises, which is [documented below](#promises).
 
 ---
 
@@ -131,6 +153,10 @@ suspend.run(function*() {
     if (err) console.error(err);
 });
 ```
+
+### `suspend(fn*)`
+
+An alias for [`suspend.fn(fn*)`](#suspendfnfn).
 
 ## Suspending and Resuming Execution
 
