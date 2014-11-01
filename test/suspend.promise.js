@@ -109,6 +109,34 @@ describe('suspend.promise(fn*)()', function() {
 			done();
 		});
 	});
+
+	it('should not unleash zalgo on synchronous completion', function(done) {
+		var x = 41;
+
+		suspend.promise(function*() {
+			return;
+		})().then(function() {
+			assert.strictEqual(42, x);
+			done();
+		});
+
+		// this should run before the promise fulfillment
+		x += 1;
+	});
+
+	it('should not unleash zalgo on synchronously thrown errors', function(done) {
+		var x = 41;
+
+		suspend.promise(function*() {
+			throw new Error();
+		})().then(noop, function() {
+			assert.strictEqual(42, x);
+			done();
+		});
+
+		// this should run before the promise fulfillment
+		x += 1;
+	});
 });
 
 // functions used for test cases

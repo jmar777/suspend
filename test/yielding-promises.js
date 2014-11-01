@@ -22,56 +22,27 @@ describe('yielded promises', function() {
 	});
 
 	it('should not swallow exception', function(done) {
-		// test uncaught exception
-		// http://stackoverflow.com/questions/9025095/how-can-i-test-uncaught-errors-in-mocha
-		var errorHandler = process.listeners('uncaughtException').pop();
-		process.removeListener('uncaughtException', errorHandler);
-
-		var recordedError = null;
-		function newHandler(error) {
-			recordedError = error;
-		}
-		process.on('uncaughtException', newHandler);
-
-		run(function*() {
-			yield asyncError(); // this is uncaught exception
-		});
-
-		setTimeout(function() {
-			process.removeListener('uncaughtException', newHandler);
-			process.on('uncaughtException', errorHandler);
-
-			assert(recordedError !== null);
-			assert(recordedError.message === 'oops');
+		captureNextUncaughtException(function(err) {
+			assert.strictEqual(err.message, 'oops');
 			done();
-		}, 40);
-	});
-
-	it('should not swallow exception with callback', function(done) {
-		// http://stackoverflow.com/questions/9025095/how-can-i-test-uncaught-errors-in-mocha
-		var errorHandler = process.listeners('uncaughtException').pop();
-		process.removeListener('uncaughtException', errorHandler);
-
-		var recordedError = null;
-		function newHandler(error) {
-			recordedError = error;
-		}
-		process.on('uncaughtException', newHandler);
+		});
 
 		run(function*() {
 			yield asyncError();
-		}, function (err) {
-			if (err) throw err; // this is uncaught exception
+		});
+	});
+
+	it('should not swallow exceptions in callback', function(done) {
+		captureNextUncaughtException(function(err) {
+			assert.strictEqual(err.message, 'from callback');
+			done();
 		});
 
-		setTimeout(function() {
-			process.removeListener('uncaughtException', newHandler);
-			process.on('uncaughtException', errorHandler);
-
-			assert(recordedError !== null);
-			assert(recordedError.message === 'oops');
-			done();
-		}, 40);
+		run(function*() {
+			yield asyncError();
+		}, function(err) {
+			if (err) throw new Error('from callback');
+		});
 	});
 
 	it('should behave correctly when multiple generators run in parallel', function(done) {
@@ -121,4 +92,16 @@ function asyncError() {
 	return new Promise(function(resolve, reject) {
 		setTimeout(reject.bind(null, new Error('oops')), 20);
 	});
+}
+
+function captureNextUncaughtException(cb) {
+	var mochaListener = process.listeners('uncaughtException')[0];
+	process.removeListener('uncaughtException', mochaListener);
+	var newListener = function(err) {
+		// restore mocha's listener
+		process.removeListener('uncaughtException', newListener);
+		process.on('uncaughtException', mochaListener);
+		cb(err);
+	}
+	process.on('uncaughtException', newListener);
 }

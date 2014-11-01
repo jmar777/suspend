@@ -84,6 +84,34 @@ describe('suspend.run(fn*, cb)', function() {
 			done();
 		});
 	});
+
+	it('should not unleash zalgo on synchronous completion', function(done) {
+		var x = 41;
+
+		run(function*() {
+			return;
+		}, function() {
+			assert.strictEqual(42, x);
+			done();
+		});
+
+		// this should run before the callback
+		x += 1;
+	});
+
+	it('should not unleash zalgo on synchronously thrown errors', function(done) {
+		var x = 41;
+
+		run(function*() {
+			throw new Error();
+		}, function() {
+			assert.strictEqual(42, x);
+			done();
+		});
+
+		// this should run before the callback
+		x += 1;
+	});
 });
 
 // functions used for test cases
