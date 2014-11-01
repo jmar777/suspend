@@ -362,9 +362,9 @@ $ npm run-script test-es5
 
 A special thanks to [Gorgi Kosev](http://spion.github.io/) for his consistently valuable feedback on suspend's API (and sundry related topics).
 
-Additional thanks goes to [Ben Newman](https://github.com/benjamn), [Willem](https://github.com/helmus), [Michael Hart](https://github.com/mhart), and [Sonny Piers](https://github.com/sonnyp) for their contributions to the project.
+Additional thanks goes to [Ben Newman](https://github.com/benjamn), [Willem](https://github.com/helmus), [Michael Hart](https://github.com/mhart), [Sonny Piers](https://github.com/sonnyp), and [Yunsong Guo](https://github.com/gyson) for their contributions to the project.
 
-## License 
+## License
 
 The MIT License (MIT)
 
