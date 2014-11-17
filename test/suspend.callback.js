@@ -1,65 +1,65 @@
 var assert = require('assert'),
 	suspend = require('../'),
-	async = suspend.async,
+	callback = suspend.callback,
 	resume = suspend.resume;
 
-describe('suspend.async(fn*)', function() {
+describe('suspend.callback(fn*)', function() {
 	it('should return a function', function(done) {
-		var ret = async(function* () {});
+		var ret = callback(function* () {});
 		assert.strictEqual(typeof ret, 'function');
 		done();
 	});
 
 	it('should not run immediately', function(done) {
-		async(function*() {
+		callback(function*() {
 			throw new Error('you ran me');
 		});
 		setTimeout(done, 1);
 	});
 
 	it('should throw if GeneratorFunction argument is missing', function(done) {
-		assert.throws(async, /must be a GeneratorFunction/);
+		assert.throws(callback, /must be a GeneratorFunction/);
 		done();
 	});
 
 	it('should throw if GeneratorFunction argument is wrong type', function(done) {
-		assert.throws(async.bind(null, 'foo'), /must be a GeneratorFunction/);
+		assert.throws(callback.bind(null, 'foo'), /must be a GeneratorFunction/);
 		done();
 	});
 });
 
-describe('suspend.async(fn*)()', function() {
+describe('suspend.callback(fn*)()', function() {
 	it('should invoke callback when done', function(done) {
-		async(function*() {})(done);
+		callback(function*() {})(done);
 	});
 
 	it('should throw if callback argument is missing', function(done) {
-		assert.throws(async(function*() {}), /must be a callback/);
+		assert.throws(callback(function*() {}), /must be a callback/);
 		done();
 	});
 
 	it('should throw if callback argument is wrong type', function(done) {
 		assert.throws(
-			async(function*() {}).bind(null, 'foo'),
+			callback(function*() {}).bind(null, 'foo'),
 			/must be a callback/
 		);
 		done();
 	});
 
 	it('should preserve `this` binding', function(done) {
-		async(function*() {
+		callback(function*() {
 			assert.strictEqual('bar', this.foo);
 		}).call({ foo: 'bar' }, done);
 	});
 
 	it('should support input parameters', function(done) {
-		async(function*(foo) {
+		callback(function*(foo) {
 			assert.strictEqual('bar', foo);
 		})('bar', done);
 	});
 
 	it('should handle multiple runs in series', function(done) {
-		var test = async(function*() {
+		var test = callback(function*() {
 			assert.strictEqual(84, yield asyncDouble(42, resume()));
 		});
 
@@ -72,7 +72,7 @@ describe('suspend.async(fn*)()', function() {
 		var doneCount = 0,
 			maybeDone = function() { ++doneCount === 2 && done() };
 
-		var test = async(function*() {
+		var test = callback(function*() {
 			assert.strictEqual(84, yield asyncDouble(42, resume()));
 		});
 
@@ -81,7 +81,7 @@ describe('suspend.async(fn*)()', function() {
 	});
 
 	it('should support continuing execution after a handled error', function(done) {
-		async(function*() {
+		callback(function*() {
 			var doubled = yield asyncDouble(7, resume());
 			try { yield asyncError(resume()); } catch (err) {}
 			assert.strictEqual(28, yield asyncDouble(doubled, resume()));
@@ -89,7 +89,7 @@ describe('suspend.async(fn*)()', function() {
 	});
 
 	it('should pass synchronously returned values to callback', function(done) {
-		async(function*() {
+		callback(function*() {
 			return 3;
 		})(function(err, val) {
 			assert.strictEqual(val, 3);
@@ -98,7 +98,7 @@ describe('suspend.async(fn*)()', function() {
 	});
 
 	it('should pass asynchronously resolved values to callback', function(done) {
-		async(function*() {
+		callback(function*() {
 			return yield asyncDouble(3, resume());
 		})(function(err, val) {
 			assert.strictEqual(val, 6);
@@ -107,7 +107,7 @@ describe('suspend.async(fn*)()', function() {
 	});
 
 	it('should pass synchronously thrown errors to callback', function(done) {
-		async(function*() {
+		callback(function*() {
 			throw new Error('oops');
 		})(function(err) {
 			assert(err.message === 'oops');
@@ -116,7 +116,7 @@ describe('suspend.async(fn*)()', function() {
 	});
 
 	it('should pass unhandled asynchronous errors to callback', function(done) {
-		async(function*() {
+		callback(function*() {
 			yield asyncError(resume());
 		})(function(err) {
 			assert(err.message === 'oops');
@@ -128,7 +128,7 @@ describe('suspend.async(fn*)()', function() {
 	it('should not unleash zalgo on synchronous completion', function(done) {
 		var x = 41;
 
-		async(function*() {
+		callback(function*() {
 			return;
 		})(function() {
 			assert.strictEqual(42, x);
@@ -142,7 +142,7 @@ describe('suspend.async(fn*)()', function() {
 	it('should not unleash zalgo on synchronously thrown errors', function(done) {
 		var x = 41;
 
-		async(function*() {
+		callback(function*() {
 			throw new Error();
 		})(function() {
 			assert.strictEqual(42, x);
