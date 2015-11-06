@@ -10,7 +10,7 @@
 	},
 	"main": "lib/suspend.js",
 	"scripts": {
-		"test": "node ./node_modules/mocha/bin/mocha --harmony-generators --reporter list",
+		"test": "node ./node_modules/mocha/bin/mocha --harmony --reporter list",
 		"test-es5": "node test-es5/run.js"
 	},
 	"dependencies": {
